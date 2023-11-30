@@ -52,6 +52,8 @@ private:
 		void Dodge();
 	UFUNCTION()
 		void FlyingPunch();
+	UFUNCTION()
+		void TestMontage();
 	FVector FindForwardSwingForce();
 	FVector FindRightSwingForce();
 

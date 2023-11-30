@@ -10,5 +10,5 @@ void UCAnimNotify_StopWhenAttack::Notify(USkeletalMeshComponent* MeshComp, UAnim
 	Super::Notify(MeshComp, Animation);
 	ACSpiderManPlayer* MyPlayer = Cast<ACSpiderManPlayer>(MeshComp->GetOwner());
 	if (MyPlayer == nullptr) return;
-	MyPlayer->EnableAttackCollision();
+	//MyPlayer->EnableAttackCollision();
 }

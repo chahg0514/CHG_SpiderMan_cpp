@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "CSpiderManPlayer.h"
 #include "Animation/AnimNotifies/AnimNotify.h"
 #include "CAN_EnableAttackMeshOverlap.generated.h"
 
@@ -15,4 +16,9 @@ class CPPSPIDERMAN_API UCAN_EnableAttackMeshOverlap : public UAnimNotify
 	GENERATED_BODY()
 protected:
 	virtual void Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation) override;
+
+public:
+	UPROPERTY(EditAnywhere)
+	struct FAttackPosition AttackPosition;
+	
 };

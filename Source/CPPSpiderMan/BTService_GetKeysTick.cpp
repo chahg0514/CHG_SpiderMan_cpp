@@ -25,6 +25,13 @@ void UBTService_GetKeysTick::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* 
 	aiController->GetBlackboardComponent()->SetValueAsBool(isHitKey.SelectedKeyName, catWoman->BossState == EBossCombatType::Stunned);
 	aiController->GetBlackboardComponent()->SetValueAsBool(isSetAttackType.SelectedKeyName, catWoman->isSetAttackType);
 	aiController->GetBlackboardComponent()->SetValueAsBool(isPatrolKey.SelectedKeyName, catWoman->BossState == EBossCombatType::Patrol);
+	aiController->GetBlackboardComponent()->SetValueAsBool(isLeapKey.SelectedKeyName, catWoman->BossState == EBossCombatType::Leap);
+	if (catWoman->BossState == EBossCombatType::Leap)
+	{
+		//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Yellow, TEXT("LeapTrue"));
+	}
+
+	
 
 	
 

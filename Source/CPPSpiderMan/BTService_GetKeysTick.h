@@ -28,5 +28,8 @@ public:
 		FBlackboardKeySelector isSetAttackType;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		FBlackboardKeySelector isPatrolKey;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		FBlackboardKeySelector isLeapKey;
+	
 	
 };

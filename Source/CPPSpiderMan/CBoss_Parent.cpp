@@ -54,12 +54,13 @@ float ACBoss_Parent::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 	float Damage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
 	FMath::Clamp(currentHP -= Damage, 0, maxHP);
+	selfHpBar_Boss->SetHealth(currentHP / maxHP);
 	if (currentHP == 0)
 	{
-		//���
-		return DamageAmount;
+		//When Boss Die
+		return DamageAmount; //일단 return을 뭐라도 해줘야하니깐
 	}
-	selfHpBar_Boss->SetHealth(currentHP / maxHP);
+	
 	//GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Black, TEXT("acceptDamageInBossParent"));
 	return DamageAmount;
 }

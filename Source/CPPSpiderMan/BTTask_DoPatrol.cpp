@@ -41,9 +41,9 @@
 //
 //	ExecuteTime += DeltaSeconds;
 //
-//	Boss->SetCirclePatrolTargetVector(PatrolTarget); //±»ÀÌ bool·Î È®ÀÎ ¾ÈÇØµµ »õ·Î°»½ÅÇÏ´Â°Å ¾Æ´Ï¸é °ª ¾È¹Ù²Þ
+//	Boss->SetCirclePatrolTargetVector(PatrolTarget); //ï¿½ï¿½ï¿½ï¿½ boolï¿½ï¿½ È®ï¿½ï¿½ ï¿½ï¿½ï¿½Øµï¿½ ï¿½ï¿½ï¿½Î°ï¿½ï¿½ï¿½ï¿½Ï´Â°ï¿½ ï¿½Æ´Ï¸ï¿½ ï¿½ï¿½ ï¿½È¹Ù²ï¿½
 //
-//	if (Boss->MoveToPatrolVector()) //µµÂøÇÏ¸é ÇÒ °Å : 
+//	if (Boss->MoveToPatrolVector()) //ï¿½ï¿½ï¿½ï¿½ï¿½Ï¸ï¿½ ï¿½ï¿½ ï¿½ï¿½ : 
 //	{
 //
 //	}
@@ -51,7 +51,7 @@
 //
 //	if (ExecuteTime > 5)
 //	{
-//		Boss->WhenEndStateCompletely(); //¿©±â¼­ patrolÀ» Á¦¿ÜÇÑ °Í ¼±ÅÃ
+//		Boss->WhenEndStateCompletely(); //ï¿½ï¿½ï¿½â¼­ patrolï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 //		ExecuteTime = 0;
 //		
 //		EnemyAIController->SetFocus(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
@@ -59,7 +59,7 @@
 //	}
 //	
 //	
-//	//¹üÀ§°¡ ¸Ö´Ù¸é Ä³¸¯ÅÍÂÊÀ¸·Î µµ¾àÇØ¼­ ´Ù°¡°¡°í, Á¦ÀÚ¸®¿¡¼­ Circle Patrol ÇÏ±â
+//	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ö´Ù¸ï¿½ Ä³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ø¼ï¿½ ï¿½Ù°ï¿½ï¿½ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½Ú¸ï¿½ï¿½ï¿½ï¿½ï¿½ Circle Patrol ï¿½Ï±ï¿½
 //
 //
 //

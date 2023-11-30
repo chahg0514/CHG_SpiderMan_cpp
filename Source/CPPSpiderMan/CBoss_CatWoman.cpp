@@ -3,6 +3,8 @@
 
 #include "CBoss_CatWoman.h"
 #include "CBoss_Parent.h"
+#include "CAnimInstance_CatWoman.h"
+
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "CAIController_CatWoman.h"
@@ -64,7 +66,7 @@ ACBoss_CatWoman::ACBoss_CatWoman()
 	}
 	swordComponent->SetupAttachment(GetMesh(), "hand_Sword");
 	swordComponent->SetWorldScale3D(FVector(2, 2, 2));
-	
+
 
 	OnTakeAnyDamage.AddDynamic(this, &ACBoss_CatWoman::TakeAnyDamage);
 
@@ -88,22 +90,25 @@ ACBoss_CatWoman::ACBoss_CatWoman()
 	FMotionWarpingTarget target = {};
 	target.Name = FName("BasicAttack");
 	MotionWarpingComp->AddOrUpdateWarpTarget(target);
+	
 }
 
 void ACBoss_CatWoman::BeginPlay()
 {
 	Super::BeginPlay();
-
-	player = Cast<ACSpiderManPlayer>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	AnimInsRef = Cast<UCAnimInstance_CatWoman>(GetMesh()->GetAnimInstance());
+	TargetSpider = Cast<ACSpiderManPlayer>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 }
 
 void ACBoss_CatWoman::SetMontageEnded(FString string)
 {
-	
+
 }
 
-void ACBoss_CatWoman::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+void ACBoss_CatWoman::OnWarpMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("OnWarpMontageEnded"));
+	MotionWarpingComp->RemoveWarpTarget(FName(*CurrentMontageName));
 	BossState = EBossCombatType::Patrol;
 }
 
@@ -136,13 +141,39 @@ void ACBoss_CatWoman::PlayMontageByName(FName name)
 	{
 		PlayAnimMontage(temp.Montage);
 	}
-	
+
+}
+
+void ACBoss_CatWoman::SetWarpTarget(FName name, FVector vector)
+{
+	MotionWarpingComp->AddOrUpdateWarpTargetFromLocation(name, vector);
+}
+
+float ACBoss_CatWoman::PlayWarpMontage(FName name)
+{
+	if (BossMontageDT)
+	{
+		UAnimMontage* montage = BossMontageDT->FindRow<FBossMontage>(name, TEXT(""))->Montage;
+		if (montage)
+		{
+			CurrentMontageName = name.ToString();
+			float temp = PlayAnimMontage(montage);
+
+			FOnMontageEnded endDelegate;
+			endDelegate.BindUObject(this, &ACBoss_CatWoman::OnWarpMontageEnded);
+			AnimInsRef->Montage_SetEndDelegate(endDelegate, montage);
+
+			return temp;
+		}
+	}
+	return 0;
 }
 
 void ACBoss_CatWoman::EndAllState()
 {
+	
 	StopAnimMontage();
-	BossState = EBossCombatType::Patrol; //¿Ã∂ß ≥ π´ ∏’ ∞≈∏Æø° ¿÷¿∏∏È ¡°«¡«ÿº≠ «√∑π¿ÃæÓ¬ ¿∏∑Œ ≥Øæ∆ø¿¥¬∞≈¿”
+	BossState = EBossCombatType::Patrol; //Ïù¥Îïå ÎÑàÎ¨¥ Î®º Í±∞Î¶¨Ïóê ÏûàÏúºÎ©¥ Ï†êÌîÑÌï¥ÏÑú ÌîåÎ†àÏù¥Ïñ¥Ï™ΩÏúºÎ°ú ÎÇ†ÏïÑÏò§ÎäîÍ±∞ÏûÑ
 }
 
 
@@ -156,7 +187,7 @@ void ACBoss_CatWoman::BasicAttack()
 
 void ACBoss_CatWoman::SetDisBeforePatrol()
 {
-	if (GetDisBetweenPlayer() > 2000) //ºˆƒ° ¡∂¡§ « ø‰
+	if (GetDisBetweenPlayer() > 2000) //ÏàòÏπò Ï°∞Ï†ï ÌïÑÏöî
 	{
 
 	}
@@ -171,16 +202,16 @@ void ACBoss_CatWoman::SetWalkSpeed(float value)
 
 float ACBoss_CatWoman::GetDisBetweenPlayer()
 {
-	if (player)
+	if (TargetSpider)
 	{
-		return UKismetMathLibrary::Vector_Distance(GetActorLocation(), player->GetActorLocation());
+		return UKismetMathLibrary::Vector_Distance(GetActorLocation(), TargetSpider->GetActorLocation());
 	}
 	return 0.0f;
 }
 
 
 
-bool ACBoss_CatWoman::MoveToPlayerByDistance() //Distance∑Œ ƒ≥∏Ø≈Õø°∞‘ ¥Ÿ∞°∞°∞Ì, ∞≈∏Æ ≥ª∂Û∏È true π›»Ø
+bool ACBoss_CatWoman::MoveToPlayerByDistance() //DistanceÎ°ú Ï∫êÎ¶≠ÌÑ∞ÏóêÍ≤å Îã§Í∞ÄÍ∞ÄÍ≥†, Í±∞Î¶¨ ÎÇ¥ÎùºÎ©¥ true Î∞òÌôò
 {
 	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("MoveToPlayer"));
 	if (GetDisBetweenPlayer() <= AttackDistance)
@@ -190,7 +221,7 @@ bool ACBoss_CatWoman::MoveToPlayerByDistance() //Distance∑Œ ƒ≥∏Ø≈Õø°∞‘ ¥Ÿ∞°∞°∞Ì,
 	}
 	else
 	{
-		UAIBlueprintHelperLibrary::SimpleMoveToLocation(GetController(), player->GetActorLocation());
+		UAIBlueprintHelperLibrary::SimpleMoveToLocation(GetController(), TargetSpider->GetActorLocation());
 		return false;
 	}
 }
@@ -205,22 +236,22 @@ void ACBoss_CatWoman::SetCirclePatrolTargetVector(FVector& target)
 	}
 	else
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, TEXT("SetMoveVector"));
+		//GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, TEXT("SetMoveVector"));
 		if (UKismetMathLibrary::RandomIntegerInRange(0, 1) == 0)
 		{
-			//øﬁ¬ 
-			target = GetActorLocation() + GetActorForwardVector() * 400 + GetActorRightVector() * -50;
+			//ÏôºÏ™Ω
+			target = GetActorLocation() + GetActorForwardVector() * 400 + GetActorRightVector() * -10;
 			PatrolTargetVector = target;
-			//º”µµ ¥¿∏Æ∞‘?
+			//ÏÜçÎèÑ ÎäêÎ¶¨Í≤å?
 			isSetPatrolTarget = true;
 			return;
 		}
 		else
 		{
-			//ø¿∏•¬ 
-			target = GetActorLocation() + GetActorForwardVector() * 400 + GetActorRightVector() * 50;
+			//Ïò§Î•∏Ï™Ω
+			target = GetActorLocation() + GetActorForwardVector() * 400 + GetActorRightVector() * 10;
 			PatrolTargetVector = target;
-			//º”µµ ¥¿∏Æ∞‘?
+			//ÏÜçÎèÑ ÎäêÎ¶¨Í≤å?
 			isSetPatrolTarget = true;
 			return;
 		}
@@ -236,7 +267,7 @@ bool ACBoss_CatWoman::MoveToPatrolVector()
 		if (UKismetMathLibrary::Vector_Distance(GetActorLocation(), PatrolTargetVector) <= 45)
 		{
 			isSetPatrolTarget = false;
-			//º”µµ ø¯∑°¥Î∑Œ?
+			//ÏÜçÎèÑ ÏõêÎûòÎåÄÎ°ú?
 			return true;
 		}
 		return false;
@@ -246,12 +277,12 @@ bool ACBoss_CatWoman::MoveToPatrolVector()
 
 void ACBoss_CatWoman::SetNextAttackType()
 {
-	//GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, TEXT("SetAttackType"));
+	GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, TEXT("SetAttackType"));
 	BossState = EBossCombatType::BasicAttack;
 	AttackDistance = 150;
 	GetCharacterMovement()->MaxWalkSpeed = 350;
 	isSetAttackType = true;
-	
+
 }
 
 void ACBoss_CatWoman::StartAttack()
@@ -284,7 +315,7 @@ void ACBoss_CatWoman::ApplyDamage()
 
 	FHitResult hitResult;
 	if (UKismetSystemLibrary::CapsuleTraceMulti(GetWorld(), Start, End, 40, 100, UEngineTypes::ConvertToTraceType(ECC_GameTraceChannel1), true, Ignore,
-		EDrawDebugTrace::ForDuration, OutHits, true, FLinearColor::Yellow))
+		EDrawDebugTrace::None, OutHits, true, FLinearColor::Yellow))
 	{
 
 		for (auto i : OutHits)
@@ -298,8 +329,8 @@ void ACBoss_CatWoman::ApplyDamage()
 				hitResult.Location = i.Location;
 				pointDamageEvent.HitInfo = pointHitResult;
 				//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Yellow, TEXT("Result"));
-				target->TakeDamage(100, pointDamageEvent, GetController(), this);
-				
+				target->TakeDamage(50, pointDamageEvent, GetController(), this);
+
 			}
 		}
 
@@ -308,7 +339,7 @@ void ACBoss_CatWoman::ApplyDamage()
 
 void ACBoss_CatWoman::WhenEndStateCompletely()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, TEXT("EndState"));
+	//GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, TEXT("EndState"));
 	switch (BossState)
 	{
 	case EBossCombatType::BasicAttack:
@@ -335,35 +366,71 @@ void ACBoss_CatWoman::WhenEndStateCompletely()
 	}
 }
 
+void ACBoss_CatWoman::StartLeap()
+{
+	GetCharacterMovement()->StopMovementImmediately();
+}
+
+bool ACBoss_CatWoman::IsCloseToPlayer()
+{
+	if (GetDisBetweenPlayer() < LeapDistance)
+	{
+		//GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Yellow, TEXT("Close"));
+		return true;
+	}
+	
+	//GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Yellow, TEXT("Fall"));
+	return false;
+}
+
+void ACBoss_CatWoman::LeapToLocation(FVector loc)
+{
+	UAIBlueprintHelperLibrary::SimpleMoveToLocation(GetController(), loc);
+	if (UKismetMathLibrary::Vector_Distance(GetActorLocation(), loc) <= 45)
+	{
+		BossState = EBossCombatType::Patrol;
+		IsLeaping = false;
+	}
+
+}
+
+void ACBoss_CatWoman::SetMotionWarpTarget(FVector vector)
+{
+
+}
+
 void ACBoss_CatWoman::HitFlyingPunch()
 {
-	EndAllState();
+	StopAnimMontage();
+	BossState = EBossCombatType::Stunned;
 }
 
 float ACBoss_CatWoman::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	//µ•πÃ¡ˆ µÈæÓø¿∏È Patrol≥°≥ª∞Ì EndPatrol∑Œ πŸ≤Ÿ∞Ì, treeø°º≠ set attack type «“ ºˆ ¿÷µµ∑œ
+	//Îç∞ÎØ∏ÏßÄ Îì§Ïñ¥Ïò§Î©¥ PatrolÎÅùÎÇ¥Í≥† EndPatrolÎ°ú Î∞îÍæ∏Í≥†, treeÏóêÏÑú set attack type Ìï† Ïàò ÏûàÎèÑÎ°ù
 	float Damage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-	
+
 	/*if (DamageEvent.ClassID == UCDamageType_FlyingPunch::StaticClass())
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, TEXT("DamageTypeFlyingPunch"));
 	}*/
-	
+
 	if (DamageEvent.IsOfType(FDamageEvent::ClassID))
 	{
 		//GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Black, TEXT("Damage"));
-		//¿Ã∞≈∂˚ ∆˜¿Œ∆Æ µ•πÃ¡ˆ∂˚ ∞∞¿Ã Ω««‡µ 
-		
+		//Ïù¥Í±∞Îûë Ìè¨Ïù∏Ìä∏ Îç∞ÎØ∏ÏßÄÎûë Í∞ôÏù¥ Ïã§ÌñâÎê®
+
 	}
 	//DamageEvent.DamageTypeClass
-	//PointDamage πﬁ±‚
+	//PointDamage Î∞õÍ∏∞
 	if (DamageEvent.IsOfType(FPointDamageEvent::ClassID))
 	{
 		if (BossState == EBossCombatType::Patrol)
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Yellow, TEXT("TakeDamage"));
+
 			BossState = EBossCombatType::Stunned;
+			GetCharacterMovement()->StopMovementImmediately();
 			//WhenEndStateCompletely();
 			FHitResult hitResult;
 			FVector temp;
@@ -374,18 +441,18 @@ float ACBoss_CatWoman::TakeDamage(float DamageAmount, FDamageEvent const& Damage
 			start = FVector(GetActorLocation().X, GetActorLocation().Y, 0);
 			target = FVector(hitResult.Location.X, hitResult.Location.Y, 0);
 
-			//ø©±‚º≠ SpawnActor «ÿ∫¡º≠ ¿ßƒ° ≈◊Ω∫∆Æ«ÿ∫Ω
+			//Ïó¨Í∏∞ÏÑú SpawnActor Ìï¥Î¥êÏÑú ÏúÑÏπò ÌÖåÏä§Ìä∏Ìï¥Î¥Ñ
 
 			FVector velocity = UKismetMathLibrary::FindLookAtRotation(start, target).Vector();
 
-			
+
 
 			float dir = UKismetAnimationLibrary::CalculateDirection(velocity, GetActorRotation());
 			HitMontageByDir(dir);
 		}
-		
+
 	}
-	
+
 
 	return Damage;
 }
@@ -393,4 +460,8 @@ float ACBoss_CatWoman::TakeDamage(float DamageAmount, FDamageEvent const& Damage
 void ACBoss_CatWoman::TakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Black, TEXT("TakeAnyDamage"));
+}
+
+void ACBoss_CatWoman::OnMotionWarpMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
 }

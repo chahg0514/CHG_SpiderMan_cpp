@@ -15,5 +15,6 @@ class CPPSPIDERMAN_API UCAN_SetEnableNextCombo : public UAnimNotify
 	GENERATED_BODY()
 protected:
 	virtual void Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation) override;
+
 	
 };

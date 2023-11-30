@@ -9,5 +9,5 @@ void UCAN_EnableAttackMeshOverlap::Notify(USkeletalMeshComponent* MeshComp, UAni
 	Super::Notify(MeshComp, Animation);
 	ACSpiderManPlayer* MyPlayer = Cast<ACSpiderManPlayer>(MeshComp->GetOwner());
 	if (MyPlayer == nullptr) return;
-	MyPlayer->EnableAttackCollision();
+	MyPlayer->EnableAttackCollision(AttackPosition);
 }

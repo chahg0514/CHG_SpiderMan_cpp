@@ -17,11 +17,14 @@ namespace SoundName
 	const FName EndPunch = TEXT("EndPunch");
 }
 
-namespace SkillAttackName
+namespace SpiderMontageName
 {
 
 	const FName FlyingPunch = TEXT("FlyingPunch");
 	const FName Dodge = TEXT("Dodge");
+	const FName HitFront = TEXT("HitFront");
+	const FName HitBack = TEXT("HitBack");
+
 }
 
 

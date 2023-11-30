@@ -43,8 +43,6 @@ protected:
 
 	class UCHealthBar_Boss* selfHpBar_Boss;
 
-	UPROPERTY(EditAnywhere, Category = "Widget")
-		TSubclassOf<class UUserWidget> HealthWidget;
 
 protected:
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;

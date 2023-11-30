@@ -48,9 +48,10 @@ void ACSpiderManController::SetupInputComponent()
 	InputComponent->BindAction(TEXT("BasicAttack"), IE_Pressed, this, &ACSpiderManController::BasicAttack);
 	InputComponent->BindAction(TEXT("Dodge"), IE_Pressed, this, &ACSpiderManController::Dodge);
 	InputComponent->BindAction(TEXT("FlyingPunch"), IE_Pressed, this, &ACSpiderManController::FlyingPunch);
+	InputComponent->BindAction(TEXT("TestMontage"), IE_Pressed, this, &ACSpiderManController::TestMontage);
 	//InputComponent->BindAction(TEXT("ObjectAttack"), IE_Pressed, this, &ACSpiderManController::);
 
-
+	
 
 
 
@@ -188,6 +189,11 @@ void ACSpiderManController::Dodge()
 void ACSpiderManController::FlyingPunch()
 {
 	MyPlayer->FlyingAttackInput();
+}
+
+void ACSpiderManController::TestMontage()
+{
+	MyPlayer->TestMontageInput();
 }
 
 FVector ACSpiderManController::FindForwardSwingForce()
