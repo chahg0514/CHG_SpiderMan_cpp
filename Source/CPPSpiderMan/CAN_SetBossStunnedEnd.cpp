@@ -9,5 +9,5 @@ void UCAN_SetBossStunnedEnd::Notify(USkeletalMeshComponent* MeshComp, UAnimSeque
 	Super::Notify(MeshComp, Animation);
 	ACBoss_CatWoman* MyPlayer = Cast<ACBoss_CatWoman>(MeshComp->GetOwner());
 	if (MyPlayer == nullptr) return;
-	MyPlayer->BossState = EBossCombatType::Patrol;
+	MyPlayer->BossState = EBossState::Patrol;
 }

@@ -32,6 +32,11 @@ ACBoss_CatWoman::ACBoss_CatWoman()
 		HitMontage = HitMtg.Object;
 
 	}
+	static ConstructorHelpers::FObjectFinder<UAnimationAsset> AnimationAsset(TEXT("/Script/Engine.AnimSequence'/Game/catwoman__1_/Animation/Final/CatDeathBack_Anim.CatDeathBack_Anim'"));
+	if (AnimationAsset.Succeeded())
+	{
+		DeathAnim0 = AnimationAsset.Object;
+	}
 
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> MeshAsset(TEXT("/Script/Engine.SkeletalMesh'/Game/catwoman__1_/Catwoman.Catwoman'"));
 
@@ -109,7 +114,7 @@ void ACBoss_CatWoman::OnWarpMontageEnded(UAnimMontage* Montage, bool bInterrupte
 {
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("OnWarpMontageEnded"));
 	MotionWarpingComp->RemoveWarpTarget(FName(*CurrentMontageName));
-	BossState = EBossCombatType::Patrol;
+	BossState = EBossState::Patrol;
 }
 
 void ACBoss_CatWoman::HitMontageByDir(float dir)
@@ -144,6 +149,30 @@ void ACBoss_CatWoman::PlayMontageByName(FName name)
 
 }
 
+void ACBoss_CatWoman::PlayDeathMontage(FName name)
+{
+	if (BossMontageDT)
+	{
+		UAnimMontage* montage = BossMontageDT->FindRow<FBossMontage>(name, TEXT(""))->Montage;
+		if (montage)
+		{
+			float temp = PlayAnimMontage(montage);
+
+			FTimerHandle myTimerHandle;
+			GetWorld()->GetTimerManager().SetTimer(myTimerHandle, FTimerDelegate::CreateLambda([&]()
+				{
+					// 내가 원하는 코드 구현
+					GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
+					GetMesh()->SetSimulatePhysics(true);
+
+					// 타이머 초기화
+					GetWorld()->GetTimerManager().ClearTimer(myTimerHandle);
+				}), 1.2, false);
+
+		}
+	}
+}
+
 void ACBoss_CatWoman::SetWarpTarget(FName name, FVector vector)
 {
 	MotionWarpingComp->AddOrUpdateWarpTargetFromLocation(name, vector);
@@ -173,7 +202,7 @@ void ACBoss_CatWoman::EndAllState()
 {
 	
 	StopAnimMontage();
-	BossState = EBossCombatType::Patrol; //이때 너무 먼 거리에 있으면 점프해서 플레이어쪽으로 날아오는거임
+	BossState = EBossState::Patrol; //이때 너무 먼 거리에 있으면 점프해서 플레이어쪽으로 날아오는거임
 }
 
 
@@ -208,6 +237,8 @@ float ACBoss_CatWoman::GetDisBetweenPlayer()
 	}
 	return 0.0f;
 }
+
+
 
 
 
@@ -261,7 +292,7 @@ void ACBoss_CatWoman::SetCirclePatrolTargetVector(FVector& target)
 bool ACBoss_CatWoman::MoveToPatrolVector()
 {
 	//GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, TEXT("MoveToPatrolVector"));
-	if (isSetPatrolTarget && BossState == EBossCombatType::Patrol)
+	if (isSetPatrolTarget && BossState == EBossState::Patrol)
 	{
 		UAIBlueprintHelperLibrary::SimpleMoveToLocation(GetController(), FVector(PatrolTargetVector.X, PatrolTargetVector.Y, GetActorLocation().Z));
 		if (UKismetMathLibrary::Vector_Distance(GetActorLocation(), PatrolTargetVector) <= 45)
@@ -278,7 +309,7 @@ bool ACBoss_CatWoman::MoveToPatrolVector()
 void ACBoss_CatWoman::SetNextAttackType()
 {
 	GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, TEXT("SetAttackType"));
-	BossState = EBossCombatType::BasicAttack;
+	BossState = EBossState::BasicAttack;
 	AttackDistance = 150;
 	GetCharacterMovement()->MaxWalkSpeed = 350;
 	isSetAttackType = true;
@@ -289,16 +320,16 @@ void ACBoss_CatWoman::StartAttack()
 {
 	switch (BossState)
 	{
-	case EBossCombatType::BasicAttack:
+	case EBossState::BasicAttack:
 		PlayMontageByName(BossMontageName::basicAttack);
 		break;
-	case EBossCombatType::Patrol:
+	case EBossState::Patrol:
 		break;
-	case EBossCombatType::Skill1:
+	case EBossState::Skill1:
 		break;
-	case EBossCombatType::Skill2:
+	case EBossState::Skill2:
 		break;
-	case EBossCombatType::Stunned:
+	case EBossState::Stunned:
 		break;
 	default:
 		break;
@@ -342,24 +373,24 @@ void ACBoss_CatWoman::WhenEndStateCompletely()
 	//GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, TEXT("EndState"));
 	switch (BossState)
 	{
-	case EBossCombatType::BasicAttack:
+	case EBossState::BasicAttack:
 		isSetPatrolTarget = false;
 		isSetAttackType = false;
-		BossState = EBossCombatType::Patrol;
+		BossState = EBossState::Patrol;
 		GetCharacterMovement()->MaxWalkSpeed = OriginSpeed;
 		break;
-	case EBossCombatType::Patrol:
+	case EBossState::Patrol:
 		GetCharacterMovement()->StopMovementImmediately();
 		//GetCharacterMovement()->MaxWalkSpeed = OriginSpeed;
 		SetNextAttackType();
 		isSetPatrolTarget = false;
 		break;
-	case EBossCombatType::Skill1:
+	case EBossState::Skill1:
 		break;
-	case EBossCombatType::Skill2:
+	case EBossState::Skill2:
 		break;
-	case EBossCombatType::Stunned:
-		BossState = EBossCombatType::Patrol;
+	case EBossState::Stunned:
+		BossState = EBossState::Patrol;
 		break;
 	default:
 		break;
@@ -388,7 +419,7 @@ void ACBoss_CatWoman::LeapToLocation(FVector loc)
 	UAIBlueprintHelperLibrary::SimpleMoveToLocation(GetController(), loc);
 	if (UKismetMathLibrary::Vector_Distance(GetActorLocation(), loc) <= 45)
 	{
-		BossState = EBossCombatType::Patrol;
+		BossState = EBossState::Patrol;
 		IsLeaping = false;
 	}
 
@@ -402,13 +433,18 @@ void ACBoss_CatWoman::SetMotionWarpTarget(FVector vector)
 void ACBoss_CatWoman::HitFlyingPunch()
 {
 	StopAnimMontage();
-	BossState = EBossCombatType::Stunned;
+	BossState = EBossState::Stunned;
 }
 
 float ACBoss_CatWoman::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	//데미지 들어오면 Patrol끝내고 EndPatrol로 바꾸고, tree에서 set attack type 할 수 있도록
 	float Damage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	if (currentHP == 0)
+	{
+		//CatDeathMontage();
+	}
 
 	/*if (DamageEvent.ClassID == UCDamageType_FlyingPunch::StaticClass())
 	{
@@ -425,11 +461,11 @@ float ACBoss_CatWoman::TakeDamage(float DamageAmount, FDamageEvent const& Damage
 	//PointDamage 받기
 	if (DamageEvent.IsOfType(FPointDamageEvent::ClassID))
 	{
-		if (BossState == EBossCombatType::Patrol)
+		if (BossState == EBossState::Patrol)
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Yellow, TEXT("TakeDamage"));
 
-			BossState = EBossCombatType::Stunned;
+			BossState = EBossState::Stunned;
 			GetCharacterMovement()->StopMovementImmediately();
 			//WhenEndStateCompletely();
 			FHitResult hitResult;
@@ -464,4 +500,32 @@ void ACBoss_CatWoman::TakeAnyDamage(AActor* DamagedActor, float Damage, const UD
 
 void ACBoss_CatWoman::OnMotionWarpMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
+}
+
+void ACBoss_CatWoman::CatDeathMontage(float DotResult)
+{
+	GetMesh()->PlayAnimation(DeathAnim0, false);
+	StopAnimMontage();
+	GetCharacterMovement()->StopMovementImmediately();
+	BossState = EBossState::Stunned;
+	FTimerHandle myTimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(myTimerHandle, FTimerDelegate::CreateLambda([&]()
+		{
+			// 내가 원하는 코드 구현
+			GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
+			GetMesh()->SetSimulatePhysics(true);
+
+			// 타이머 초기화
+			GetWorld()->GetTimerManager().ClearTimer(myTimerHandle);
+		}), 2, false);
+	/*if (DotResult > 0)
+	{
+		PlayDeathMontage(BossMontageName::deathBack);
+	}
+	else
+	{
+		PlayDeathMontage(BossMontageName::deathFront);
+
+	}*/
+	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Black, TEXT("CatDeath"));
 }

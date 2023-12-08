@@ -24,6 +24,8 @@ namespace SpiderMontageName
 	const FName Dodge = TEXT("Dodge");
 	const FName HitFront = TEXT("HitFront");
 	const FName HitBack = TEXT("HitBack");
+	const FName DeathFront = TEXT("DeathFront");
+	const FName DeathBack = TEXT("DeathBack");
 
 }
 

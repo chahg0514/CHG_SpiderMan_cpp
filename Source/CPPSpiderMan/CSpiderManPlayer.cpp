@@ -313,7 +313,8 @@ void ACSpiderManPlayer::BeginPlay()
 	GetMesh()->SetGenerateOverlapEvents(true);
 
 	CustomDelay(5);
-	AnimInsRef->OnMontageEnded.AddDynamic(this, &ACSpiderManPlayer::OnAttackMontageEnded2);
+
+	AnimInsRef->OnMontageEnded.AddDynamic(this, &ACSpiderManPlayer::OnAttackMontageEndedSetIdle);
 	
 
 
@@ -407,9 +408,15 @@ void ACSpiderManPlayer::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterr
 	SpiderState = ESpiderState::IDLE;
 }
 
-void ACSpiderManPlayer::OnAttackMontageEnded2(UAnimMontage* Montage, bool bInterrupted)
+void ACSpiderManPlayer::OnAttackMontageEndedSetIdle(UAnimMontage* Montage, bool bInterrupted)
 {
 	SpiderState = ESpiderState::IDLE;
+}
+
+void ACSpiderManPlayer::OnDeathMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
+	GetMesh()->SetSimulatePhysics(true);
 }
 
 // Called to bind functionality to input
@@ -1845,7 +1852,7 @@ void ACSpiderManPlayer::PlayComboAttackMontage(int comboCount)
 	//SetMotionWarpingLoc();
 	
 	FOnMontageEnded endDelegate;
-	endDelegate.BindUObject(this, &ACSpiderManPlayer::OnAttackMontageEnded2);
+	endDelegate.BindUObject(this, &ACSpiderManPlayer::OnAttackMontageEndedSetIdle);
 	//AnimInsRef->Set
 	//AnimInsRef->Montage_Play(temp.AttackMontage);
 	PlayAnimMontage(temp.AttackMontage);
@@ -1935,9 +1942,38 @@ float ACSpiderManPlayer::PlayWarpSkillMontage(FName name)
 			AnimInsRef->Montage_SetEndDelegate(endDelegate, montage);
 
 			return temp;
+			
 		}
 	}
 	return 0;
+}
+
+float ACSpiderManPlayer::PlayDeathMontage(FName name)
+{
+	
+	if (SkillAttackMontageDT)
+	{
+		UAnimMontage* montage = SkillAttackMontageDT->FindRow<FAttackMontage>(name, TEXT(""))->AttackMontage;
+		if (montage)
+		{
+			float temp = PlayAnimMontage(montage);
+			FTimerHandle myTimerHandle;
+			GetWorld()->GetTimerManager().SetTimer(myTimerHandle, FTimerDelegate::CreateLambda([&]()
+				{
+					// 내가 원하는 코드 구현
+					GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
+					GetMesh()->SetSimulatePhysics(true);
+
+					// 타이머 초기화
+					GetWorld()->GetTimerManager().ClearTimer(myTimerHandle);
+				}), 1, false);
+			
+
+			return temp;
+
+		}
+	}
+	return 0.0f;
 }
 
 bool ACSpiderManPlayer::PlayMontageByName(FName name)
@@ -2004,14 +2040,26 @@ float ACSpiderManPlayer::TakeDamage(float DamageAmount, FDamageEvent const& Dama
 	float Damage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	FMath::Clamp(CurrentHP -= Damage, 0, MaxHP);
 	SpiderWidget->SetHealth(CurrentHP / MaxHP);
+
+	float DotResult = DamageCauser->GetActorForwardVector().Dot(GetActorForwardVector());
+
 	if (CurrentHP == 0)
 	{
-		return Damage;
+		//죽음
+		if (DotResult > 0) //0보다 크면 같은방향을 바라보고 있는거니까
+		{
+			PlayDeathMontage(SpiderMontageName::DeathBack);
+			return Damage;
+		}
+		else
+		{
+			PlayDeathMontage(SpiderMontageName::DeathFront);
+			return Damage;
+		}
 	}
 	//SpiderWidget->SetHealth()
 	if (SpiderState == ESpiderState::IDLE)
 	{
-		float DotResult = DamageCauser->GetActorForwardVector().Dot(GetActorForwardVector());
 		if (DotResult > 0) //0보다 크면 같은방향을 바라보고 있는거니까
 		{
 			PlayMontageByName(SpiderMontageName::HitBack);
@@ -2029,6 +2077,7 @@ float ACSpiderManPlayer::TakeDamage(float DamageAmount, FDamageEvent const& Dama
 
 void ACSpiderManPlayer::EndCombo()
 {
+	
 	isEnableNextCombo = false;
 	ComboCount = 0;
 	isMovementLocked = false;
@@ -2038,7 +2087,8 @@ void ACSpiderManPlayer::EndCombo()
 
 void ACSpiderManPlayer::TestMontageInput()
 {
-	PlayMontageByName(SpiderMontageName::HitBack);
+	PlayDeathMontage(SpiderMontageName::DeathBack);
+	//PlayMontageByName(SpiderMontageName::DeathFront);
 }
 
 FVector ACSpiderManPlayer::FindWallRunForwardVector()
@@ -2209,7 +2259,6 @@ void ACSpiderManPlayer::ApplyDamage_FlyingPunch()
 				FHitResult pointHitResult;
 				hitResult.Location = i.Location;
 				pointDamageEvent.HitInfo = pointHitResult;
-				//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Yellow, TEXT("Result"));
 				target->TakeDamage(100, pointDamageEvent, GetController(), this);
 				PlaySoundByName(SoundName::Punch0);
 			}

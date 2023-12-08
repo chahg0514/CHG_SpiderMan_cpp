@@ -106,7 +106,9 @@ private:
 	UFUNCTION()
 		void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 	UFUNCTION()
-		void OnAttackMontageEnded2(UAnimMontage* Montage, bool bInterrupted);
+		void OnAttackMontageEndedSetIdle(UAnimMontage* Montage, bool bInterrupted);
+	UFUNCTION()
+		void OnDeathMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 	UPROPERTY(VisibleAnywhere, Category = "Camera")
 		class USpringArmComponent* SpringArm;
 	UPROPERTY(VisibleAnywhere, Category = "Camera")
@@ -355,6 +357,7 @@ private:
 //SkillAttack
 private:
 	float PlayWarpSkillMontage(FName name); //이름으로 모션워핑 사용하는 몽타주 실행,  AttackMontageEnd 함수 연결, 현재 재생되는 몽타주 이름 저장했다가 끝날 때 WarpTarget 초기화, 재생시간 반환
+	float PlayDeathMontage(FName name);
 	bool PlayMontageByName(FName name);
 
 //Dodge

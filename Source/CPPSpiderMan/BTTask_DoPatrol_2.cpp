@@ -59,7 +59,7 @@ void UBTTask_DoPatrol_2::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* Node
 		
 		//GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, TEXT("LeapOn"));
 		BeforeLeapTime = 0;
-		Boss->BossState = EBossCombatType::Leap;
+		Boss->BossState = EBossState::Leap;
 		EnemyAIController->GetBlackboardComponent()->SetValueAsBool(isLeapKey.SelectedKeyName, true);
 		
 	}

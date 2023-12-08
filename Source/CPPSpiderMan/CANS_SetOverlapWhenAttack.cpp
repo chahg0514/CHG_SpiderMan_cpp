@@ -4,7 +4,6 @@
 #include "CANS_SetOverlapWhenAttack.h"
 #include "CSpiderManPlayer.h"
 
-//Begin이 자꾸 Tick처럼 계속 실행됨
 void UCANS_SetOverlapWhenAttack::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration, const FAnimNotifyEventReference& EventReference)
 {
 	Super::NotifyBegin(MeshComp, Animation, TotalDuration, EventReference);

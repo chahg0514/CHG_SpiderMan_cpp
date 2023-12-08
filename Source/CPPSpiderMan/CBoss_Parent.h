@@ -35,7 +35,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stat", Meta = (AllowPrivateAccess = true))
 		float damage = 10.f;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stat", Meta = (AllowPrivateAccess = true))
-		float currentHP = 10000.f;
+		float currentHP = 100.f;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stat", Meta = (AllowPrivateAccess = true))
 		float maxHP = 10000.f;
 
@@ -46,4 +46,5 @@ protected:
 
 protected:
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+	virtual void CatDeathMontage(float DotResult);
 };

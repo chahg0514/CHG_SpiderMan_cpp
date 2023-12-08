@@ -53,15 +53,23 @@ float ACBoss_Parent::TakeDamage(float DamageAmount, FDamageEvent const& DamageEv
 {
 	float Damage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
+	float DotResult = DamageCauser->GetActorForwardVector().Dot(GetActorForwardVector());
+
 	FMath::Clamp(currentHP -= Damage, 0, maxHP);
 	selfHpBar_Boss->SetHealth(currentHP / maxHP);
 	if (currentHP == 0)
 	{
 		//When Boss Die
+		CatDeathMontage(DotResult);
 		return DamageAmount; //일단 return을 뭐라도 해줘야하니깐
 	}
 	
 	//GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Black, TEXT("acceptDamageInBossParent"));
 	return DamageAmount;
 }
+
+void ACBoss_Parent::CatDeathMontage(float DotResult)
+{
+}
+
 

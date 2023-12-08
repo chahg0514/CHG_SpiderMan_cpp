@@ -8,13 +8,13 @@
 #include "CBoss_CatWoman.generated.h"
 
 UENUM(BlueprintType)
-enum class EBossCombatType : uint8
+enum class EBossState : uint8
 {
 	BasicAttack UMETA(DisplayName = "basicAttack"), //캐릭터에게 뛰어온 후 일정 거리가 되면 빠른 기본공격
 	Leap UMETA(DisplayName = "leap"), //Patrol중 IsCloseToLeap이 true면 eqs실행 후 Leap으로 진입, Leap이면 
 	Patrol UMETA(DisplayName = "patrol"), //플레이어와 거리가 멀면 다가옴, 가까우면 플레이어 주위를 원형으로 걸어다님. 기본 상태
-	EndPatrol UMETA(DisplayName = "endPatrol"),
-	SetNextAttack UMETA(DisplayName = "setNextAttack"),
+	EndPatrol UMETA(DisplayName = "endPatrol"), 
+	SetNextAttack UMETA(DisplayName = "setNextAttack"), //다음 공격 지정하는 상태
 	Skill1 UMETA(DisplayName = "skill1"), //플레이어 위치로 돌진공격 1회, 제자리 공격 2회
 	Skill2 UMETA(DisplayName = "skill2"),
 	Stunned UMETA(DisplayName = "stunned") //기본공격 맞을 때 Patrol 상태라면 스턴, FlyingPunch 공격 들어오면 무조건 스턴
@@ -40,6 +40,9 @@ namespace BossMontageName
 	const FName hitBack = TEXT("HitBack");
 	const FName basicAttack = TEXT("BasicAttack");
 	const FName leap = TEXT("Leap");
+	const FName deathFront = TEXT("DeathFront");
+	const FName deathBack = TEXT("DeathBack");
+
 
 }
 /**
@@ -77,7 +80,10 @@ private:
 
 	void HitMontageByDir(float dir);
 
-	void PlayMontageByName(FName name); //몽타주만 실행
+	void PlayMontageByName(FName name); //몽타주만 실행\
+	//Death
+	void PlayDeathMontage(FName name);
+
 public:
 	void SetWarpTarget(FName name, FVector vector);
 	float PlayWarpMontage(FName name); //몽타주 실행, 끝나면 해당 이름의 워프타겟 삭제
@@ -96,6 +102,8 @@ private:
 
 	//Leap
 	float LeapDistance = 200;
+
+	UAnimationAsset* DeathAnim0;
 public:
 
 	UPROPERTY(BlueprintReadWrite)
@@ -111,6 +119,8 @@ private:
 	//MoveTo
 	float GetDisBetweenPlayer();
 	float OriginSpeed = 150;
+
+	
 	
 
 
@@ -159,7 +169,7 @@ public:
 
 public:
 	UPROPERTY(BlueprintReadWrite)
-	EBossCombatType BossState = EBossCombatType::Patrol;
+	EBossState BossState = EBossState::Patrol;
 	bool isSetAttackType = false;
 
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
@@ -168,5 +178,9 @@ private:
 
 	UFUNCTION()
 		void OnMotionWarpMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+
+protected:
+	virtual void CatDeathMontage(float DotResult) override;
+
 
 };
