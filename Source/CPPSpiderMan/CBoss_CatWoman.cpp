@@ -25,6 +25,7 @@
 
 ACBoss_CatWoman::ACBoss_CatWoman()
 {
+	PrimaryActorTick.bCanEverTick = true;
 
 	static ConstructorHelpers::FObjectFinder<UAnimMontage> HitMtg(TEXT("/Script/Engine.AnimMontage'/Game/catwoman__1_/Animation/HitReact_Left_Montage.HitReact_Left_Montage'"));
 	if (HitMtg.Succeeded())
@@ -103,6 +104,20 @@ void ACBoss_CatWoman::BeginPlay()
 	Super::BeginPlay();
 	AnimInsRef = Cast<UCAnimInstance_CatWoman>(GetMesh()->GetAnimInstance());
 	TargetSpider = Cast<ACSpiderManPlayer>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+}
+
+void ACBoss_CatWoman::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+	if (AttackAmount > 0)
+	{
+		IsCanAttack = false;
+		AttackAmount = UKismetMathLibrary::Clamp(AttackAmount - DeltaTime, 0, 1000);
+	}
+	else
+	{
+		IsCanAttack = true;
+	}
 }
 
 void ACBoss_CatWoman::SetMontageEnded(FString string)
@@ -306,13 +321,44 @@ bool ACBoss_CatWoman::MoveToPatrolVector()
 	return false;
 }
 
-void ACBoss_CatWoman::SetNextAttackType()
+void ACBoss_CatWoman::SetNextAttackType() //거리가 가까우면 바로 할 수 있는것과 달려가서 시작해야하는 스킬 나누기
 {
 	GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, TEXT("SetAttackType"));
-	BossState = EBossState::BasicAttack;
-	AttackDistance = 150;
-	GetCharacterMovement()->MaxWalkSpeed = 350;
-	isSetAttackType = true;
+
+	if (GetDisBetweenPlayer() < 400)
+	{
+		int type = UKismetMathLibrary::RandomIntegerInRange(0, 3);
+		switch (type)
+		{
+		case 0:
+			BossState = EBossState::BasicAttack;
+			AttackDistance = 150;
+			GetCharacterMovement()->MaxWalkSpeed = 350;
+			isSetAttackType = true;
+			break;
+		case 1:
+			BossState = EBossState::FireShot;
+			AttackDistance = 150;
+			GetCharacterMovement()->MaxWalkSpeed = 350;
+			isSetAttackType = true;
+			break;
+		case 2:
+			BossState = EBossState::Dash;
+			AttackDistance = 150;
+			GetCharacterMovement()->MaxWalkSpeed = 350;
+			isSetAttackType = true;
+			break;
+		case 3:
+			BossState = EBossState::BasicAttack;
+			AttackDistance = 150;
+			GetCharacterMovement()->MaxWalkSpeed = 350;
+			isSetAttackType = true;
+			break;
+		}
+	}
+	
+	
+	
 
 }
 
@@ -325,9 +371,9 @@ void ACBoss_CatWoman::StartAttack()
 		break;
 	case EBossState::Patrol:
 		break;
-	case EBossState::Skill1:
+	case EBossState::FireShot:
 		break;
-	case EBossState::Skill2:
+	case EBossState::Dash:
 		break;
 	case EBossState::Stunned:
 		break;
@@ -385,9 +431,9 @@ void ACBoss_CatWoman::WhenEndStateCompletely()
 		SetNextAttackType();
 		isSetPatrolTarget = false;
 		break;
-	case EBossState::Skill1:
+	case EBossState::FireShot:
 		break;
-	case EBossState::Skill2:
+	case EBossState::Dash:
 		break;
 	case EBossState::Stunned:
 		BossState = EBossState::Patrol;
@@ -504,7 +550,8 @@ void ACBoss_CatWoman::OnMotionWarpMontageEnded(UAnimMontage* Montage, bool bInte
 
 void ACBoss_CatWoman::CatDeathMontage(float DotResult)
 {
-	GetMesh()->PlayAnimation(DeathAnim0, false);
+	PlayMontageByName(BossMontageName::deathBack);
+	//GetMesh()->PlayAnimation(DeathAnim0, false);
 	StopAnimMontage();
 	GetCharacterMovement()->StopMovementImmediately();
 	BossState = EBossState::Stunned;

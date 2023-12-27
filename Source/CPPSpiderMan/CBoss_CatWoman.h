@@ -10,13 +10,15 @@
 UENUM(BlueprintType)
 enum class EBossState : uint8
 {
-	BasicAttack UMETA(DisplayName = "basicAttack"), //캐릭터에게 뛰어온 후 일정 거리가 되면 빠른 기본공격
+	//Tick에서 이전에 했던 공격수치 점점 낮추고, 0이하가 되면 0으로 맞춘 뒤에 다음공격 실행가능한 상태 되도록
+	BasicAttack UMETA(DisplayName = "basicAttack"), //플레이어와 거리차이가 400 이하일 때 실행
 	Leap UMETA(DisplayName = "leap"), //Patrol중 IsCloseToLeap이 true면 eqs실행 후 Leap으로 진입, Leap이면 
 	Patrol UMETA(DisplayName = "patrol"), //플레이어와 거리가 멀면 다가옴, 가까우면 플레이어 주위를 원형으로 걸어다님. 기본 상태
 	EndPatrol UMETA(DisplayName = "endPatrol"), 
 	SetNextAttack UMETA(DisplayName = "setNextAttack"), //다음 공격 지정하는 상태
-	Skill1 UMETA(DisplayName = "skill1"), //플레이어 위치로 돌진공격 1회, 제자리 공격 2회
-	Skill2 UMETA(DisplayName = "skill2"),
+	FireShot UMETA(DisplayName = "fireShot"), //공중에 떠서 불 날림
+	Dash UMETA(DisplayName = "dash"), //기본공격 모션과함께 돌진
+	Skill UMETA(DisplayName = "skill"), //기본공격 모션과함께 돌진
 	Stunned UMETA(DisplayName = "stunned") //기본공격 맞을 때 Patrol 상태라면 스턴, FlyingPunch 공격 들어오면 무조건 스턴
 	//스킬 시전 후 재정비하는 애니메이션 구하면 스테이트 추가
 };
@@ -57,7 +59,8 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-
+public:
+	virtual void Tick(float DeltaTime) override;
 	
 private:
 	UPROPERTY(EditAnywhere, Category = "MontageData")
@@ -93,7 +96,9 @@ private:
 	void EndAllState(); //현재의 상태를 전부 취소함. 절대적인 우선순위의 스킬을 위해(Flying Punch)
 
 	//Combat
+	float AttackAmount = 0;
 	
+
 	float AttackDistance = 500;
 	
 	void BasicAttack();
@@ -108,6 +113,8 @@ public:
 
 	UPROPERTY(BlueprintReadWrite)
 	bool isSetPatrolTarget = false;
+
+	bool IsCanAttack;
 private:
 	FVector PatrolTargetVector;
 	

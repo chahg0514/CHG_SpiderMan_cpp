@@ -65,12 +65,16 @@ void UBTTask_DoPatrol_2::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* Node
 	}
 	if (ExecuteTime > 5)
 	{
-		//GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, TEXT("More5"));
-		Boss->WhenEndStateCompletely(); //여기서 patrol을 제외한 것 선택
-		ExecuteTime = 0;
-		BeforeLeapTime = 0;
+		if (Boss->IsCanAttack)
+		{
+			Boss->WhenEndStateCompletely(); //여기서 patrol을 제외한 것 선택
+			ExecuteTime = 0;
+			BeforeLeapTime = 0;
 
-		EnemyAIController->ClearFocus(EAIFocusPriority::Gameplay);
+			EnemyAIController->ClearFocus(EAIFocusPriority::Gameplay);
+		}
+		//GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, TEXT("More5"));
+		
 		//EnemyAIController->ClearFocus();
 		//FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 	}
