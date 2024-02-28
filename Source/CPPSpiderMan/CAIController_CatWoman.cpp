@@ -12,23 +12,23 @@
 
 ACAIController_CatWoman::ACAIController_CatWoman()
 {
-	PrimaryActorTick.bCanEverTick = true; //Æ½ÇÔ¼ö È°¼ºÈ­
-	SetPerceptionComponent(*CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("Perception"))); //ÆÛ¼Á¼Ç ÄÄÆ÷³ÍÆ® »ý¼º 
+	PrimaryActorTick.bCanEverTick = true; //Æ½ï¿½Ô¼ï¿½ È°ï¿½ï¿½È­
+	SetPerceptionComponent(*CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("Perception"))); //ï¿½Û¼ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½ 
 	Blackboard = CreateDefaultSubobject<UBlackboardComponent>(TEXT("BBComp"));
 	static ConstructorHelpers::FObjectFinder<UBehaviorTree> BTAsset(TEXT("/Script/AIModule.BehaviorTree'/Game/catwoman__1_/AI/BT_Boss.BT_Boss'"));
 	if (BTAsset.Succeeded())
 	{
 		BTree = BTAsset.Object;
 	}
-	SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("SightConfig")); //½Ã¾ß Á¤º¸ °´Ã¼ »ý¼º
-	SightConfig->SightRadius = 1000.f; //º¼ ¼ö ÀÖ´Â ¹üÀ§
-	SightConfig->LoseSightRadius = 1050.f; //ÀÌ¹Ì º» ¸ñÇ¥¹°À» º¼ ¼ö ÀÖ´Â ¹üÀ§
-	SightConfig->SetMaxAge(3.0f); //º¼ ¼ö ÀÖ´Â ½Ã°£
-	GetPerceptionComponent()->SetDominantSense(*SightConfig->GetSenseImplementation()); //°¨Áö¿ì¼±¼øÀ§¸¦ ½Ã¾ß·Î ¼³Á¤
-	GetPerceptionComponent()->ConfigureSense(*SightConfig); //½Ã¾ß Á¤º¸ µî·Ï
-	GetPerceptionComponent()->OnTargetPerceptionUpdated.AddDynamic(this, &ACAIController_CatWoman::OnTargetDetected); //½Ã¾ß¹üÀ§¿¡ µé¾î¿Ô´Ù¸é OnTargetDetected ÇÔ¼ö È£Ãâ
+	SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("SightConfig")); //ï¿½Ã¾ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ã¼ ï¿½ï¿½ï¿½ï¿½
+	SightConfig->SightRadius = 1000.f; //ï¿½ï¿½ ï¿½ï¿½ ï¿½Ö´ï¿½ ï¿½ï¿½ï¿½ï¿½
+	SightConfig->LoseSightRadius = 1050.f; //ï¿½Ì¹ï¿½ ï¿½ï¿½ ï¿½ï¿½Ç¥ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ ï¿½Ö´ï¿½ ï¿½ï¿½ï¿½ï¿½
+	SightConfig->SetMaxAge(3.0f); //ï¿½ï¿½ ï¿½ï¿½ ï¿½Ö´ï¿½ ï¿½Ã°ï¿½
+	GetPerceptionComponent()->SetDominantSense(*SightConfig->GetSenseImplementation()); //ï¿½ï¿½ï¿½ï¿½ï¿½ì¼±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ã¾ß·ï¿½ ï¿½ï¿½ï¿½ï¿½
+	GetPerceptionComponent()->ConfigureSense(*SightConfig); //ï¿½Ã¾ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
+	GetPerceptionComponent()->OnTargetPerceptionUpdated.AddDynamic(this, &ACAIController_CatWoman::OnTargetDetected); //ï¿½Ã¾ß¹ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ô´Ù¸ï¿½ OnTargetDetected ï¿½Ô¼ï¿½ È£ï¿½ï¿½
 
-	SightConfig->DetectionByAffiliation.bDetectNeutrals = true; //Áß¸³ °¨Áö
+	SightConfig->DetectionByAffiliation.bDetectNeutrals = true; //ï¿½ß¸ï¿½ ï¿½ï¿½ï¿½ï¿½
 
 
 	Target = Cast<ACSpiderManPlayer>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
@@ -54,7 +54,7 @@ void ACAIController_CatWoman::OnTargetDetected(AActor* InActor, FAIStimulus Stim
 		GetBlackboardComponent()->SetValueAsBool(BBKeysBoss::isFindPlayer, Stimulus.WasSuccessfullySensed());
 		TSubclassOf<UAISense> AISense;
 		TArray<AActor*> Actors;
-		GetPerceptionComponent()->GetCurrentlyPerceivedActors(AISense, Actors); //°¨ÁöµÈ ¾×ÅÍ¸¦ ¸ðµÎ ¹è¿­¿¡ ³Ö¾îÁÜ
+		GetPerceptionComponent()->GetCurrentlyPerceivedActors(AISense, Actors); //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Í¸ï¿½ ï¿½ï¿½ï¿½ ï¿½è¿­ï¿½ï¿½ ï¿½Ö¾ï¿½ï¿½ï¿½
 		for (auto Other : Actors)
 		{
 			if (ACSpiderManPlayer* MyPlayer = Cast<ACSpiderManPlayer>(Other))

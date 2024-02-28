@@ -320,7 +320,6 @@ void ACSpiderManPlayer::BeginPlay()
 
 	CustomDelay(5);
 
-	//AnimInsRef->OnMontageEnded.AddDynamic(this, &ACSpiderManPlayer::OnAttackMontageEndedSetIdle);
 	
 
 
@@ -341,10 +340,9 @@ void ACSpiderManPlayer::Tick(float DeltaTime)
 	//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Yellow, FString::Printf(TEXT("%s"), *GetCharacterMovement()->GetMovementName()));
 	
 	FString abc;
-	if (GetVelocity().Size() > 0.1)
+	if (GetCharacterMovement()->MovementMode == EMovementMode::MOVE_Flying)
 	{
-		//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Yellow, FString::Printf(TEXT("%f"), GetVelocity().Size()));
-
+		//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Yellow, TEXT("Flying"));
 	}
 	abc = GetCharacterMovement()->GetMovementName();
 	/*if (AnimInsRef->ZipToPointAnim == E
@@ -403,25 +401,31 @@ void ACSpiderManPlayer::Tick(float DeltaTime)
 
 }
 
-void ACSpiderManPlayer::SetMontageEnded(FString string)
-{
-
-}
 
 void ACSpiderManPlayer::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
 	
 	MotionWarpingComp->RemoveWarpTarget(FName(*CurrentMontageName));
-	SpiderState = ESpiderState::IDLE;
-	isMovementLocked = false;
+	//GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, TEXT("RemoveWarpTargetInEnded"));
+	//EndCombo(); 여기다 이걸 넣으면 첫번쨰 공격 끝나고 이게 실행되서 콤보공격이 계속 다시 시작됨
+	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
+	if(!AnimInsRef->Montage_IsPlaying(NULL))
+	{
+		SpiderState = ESpiderState::IDLE;
+		isMovementLocked = false;
+	}
+	
 }
 
-void ACSpiderManPlayer::OnAttackMontageEndedSetIdle(UAnimMontage* Montage, bool bInterrupted)
+void ACSpiderManPlayer::OnStopMovementMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("MontageEnded"));
-
-	SpiderState = ESpiderState::IDLE;
-	isMovementLocked = false;
+	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("MontageEnded"));
+	if (!AnimInsRef->Montage_IsPlaying(NULL))
+	{
+		SpiderState = ESpiderState::IDLE;
+		isMovementLocked = false;
+	}
+	
 
 
 }
@@ -1140,7 +1144,7 @@ bool ACSpiderManPlayer::Trace1FromCharacter(FVector& hitLocation1, FVector& hitN
 	Start = GetActorLocation() + FVector(0, 0, 50);
 	End = Start + Camera->GetForwardVector() * ZipToRange;
 
-	if (UKismetSystemLibrary::LineTraceSingle(GetWorld(), Start, End, UEngineTypes::ConvertToTraceType(ECC_Visibility), true, IgnoreActors,
+	if (UKismetSystemLibrary::LineTraceSingle(GetWorld(), Start, End, UEngineTypes::ConvertToTraceType(ECC_GameTraceChannel8), true, IgnoreActors,
 		EDrawDebugTrace::None, HitResult, true))
 	{
 		if (HitResult.bBlockingHit)
@@ -1169,7 +1173,7 @@ bool ACSpiderManPlayer::Trace2FromAboveFirstHit(FVector PreviousHitLocation, FVe
 	End = PreviousHitLocation;
 
 	if (UKismetSystemLibrary::CapsuleTraceSingle(GetWorld(), Start, End, GetCapsuleComponent()->GetScaledCapsuleRadius() - 10, GetCapsuleComponent()->GetScaledCapsuleHalfHeight(),
-		UEngineTypes::ConvertToTraceType(ECC_Visibility), true, IgnoreActors, EDrawDebugTrace::None, HitResult, true))
+		UEngineTypes::ConvertToTraceType(ECC_GameTraceChannel8), true, IgnoreActors, EDrawDebugTrace::None, HitResult, true))
 	{
 		if (HitResult.bBlockingHit)
 		{
@@ -1216,7 +1220,7 @@ bool ACSpiderManPlayer::Trace3FromInFrontOfTheHit(FVector PreviousHitLocation, F
 	Start = PreviousHitLocation + Temp * DetectionRange;
 	End = PreviousHitLocation - FVector(0, 0, 150);
 
-	if (UKismetSystemLibrary::LineTraceSingle(GetWorld(), Start, End, UEngineTypes::ConvertToTraceType(ECC_Visibility), true, IgnoreActors,
+	if (UKismetSystemLibrary::LineTraceSingle(GetWorld(), Start, End, UEngineTypes::ConvertToTraceType(ECC_GameTraceChannel8), true, IgnoreActors,
 		EDrawDebugTrace::None, HitResult, true))
 	{
 		if (HitResult.bBlockingHit)
@@ -1257,7 +1261,7 @@ bool ACSpiderManPlayer::Trace4FromAboveTheThirdHit(FVector PreviousHitLocation, 
 	End = PreviousHitLocation;
 
 	if (UKismetSystemLibrary::CapsuleTraceSingle(GetWorld(), Start, End, GetCapsuleComponent()->GetScaledCapsuleRadius() - 10, GetCapsuleComponent()->GetScaledCapsuleHalfHeight(),
-		UEngineTypes::ConvertToTraceType(ECC_Visibility), true, IgnoreActors, EDrawDebugTrace::None, HitResult, true))
+		UEngineTypes::ConvertToTraceType(ECC_GameTraceChannel8), true, IgnoreActors, EDrawDebugTrace::None, HitResult, true))
 	{
 		if ((HitResult.Normal - PreviousHitNormal).Size() > 1)
 		{
@@ -1276,7 +1280,7 @@ bool ACSpiderManPlayer::ProjectCapsuleToZipPoint(FVector HitLocation) //이거�
 	Start = HitLocation + FVector(0, 0, GetCapsuleComponent()->GetScaledCapsuleHalfHeight() + 4);
 	End = Start + FVector(0, 0, 1);
 	if(UKismetSystemLibrary::CapsuleTraceSingle(GetWorld(), Start, End, GetCapsuleComponent()->GetScaledCapsuleRadius() - 10, GetCapsuleComponent()->GetScaledCapsuleHalfHeight(),
-		UEngineTypes::ConvertToTraceType(ECC_Visibility), true, IgnoreActors, EDrawDebugTrace::None, HitResult, true))
+		UEngineTypes::ConvertToTraceType(ECC_GameTraceChannel8), true, IgnoreActors, EDrawDebugTrace::None, HitResult, true))
 	{
 		return false;
 	}
@@ -1839,12 +1843,13 @@ void ACSpiderManPlayer::CheckComboAttackStart()
 	{
 		if (isEnableNextCombo) //다음 콤보 실행
 		{
+			//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Yellow, TEXT("NotEnableNextCombo"));
 			isEnableNextCombo = false;
 			PlayNextCombo();
 		}
 		else
 		{
-			if (ComboCount == 0) //처음 공격 실행
+			if (ComboCount == 0) //처음 공격 실행, 이게 0이 아니라서 자꾸 기본공격이 안되는거였구나
 			{
 				PlayNextCombo();
 			}
@@ -1875,12 +1880,13 @@ void ACSpiderManPlayer::PlayComboAttackMontage(int comboCount)
 {
 	FAttackMontage temp = *ComboAttackMontageDT->FindRow<FAttackMontage>(MontageListIndex[comboCount], TEXT(""));
 	
-	
-	FOnMontageEnded endDelegate;
-	//endDelegate.BindUObject(this, &ACSpiderManPlayer::OnAttackMontageEndedSetIdle);
-	//AnimInsRef->Set
-	//AnimInsRef->Montage_Play(temp.AttackMontage);
 	PlayAnimMontage(temp.AttackMontage);
+	FOnMontageEnded endDelegate;
+	endDelegate.BindUObject(this, &ACSpiderManPlayer::OnAttackMontageEnded);
+	//이걸 하면 문제가 기본공격중에 데미지 들어와서 Hit중인데도 isMovementLocked가 false가 되서 움직여짐
+	AnimInsRef->Montage_SetEndDelegate(endDelegate, temp.AttackMontage);
+	//AnimInsRef->Montage_Play(temp.AttackMontage);
+	
 	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Flying);
 
 	/*if (comboCount == 0)
@@ -1981,6 +1987,27 @@ float ACSpiderManPlayer::PlayWarpSkillMontage(FName name)
 	return 0;
 }
 
+float ACSpiderManPlayer::PlayEndedFuncMontage(FName name)
+{
+	if (SkillAttackMontageDT)
+	{
+		UAnimMontage* montage = SkillAttackMontageDT->FindRow<FAttackMontage>(name, TEXT(""))->AttackMontage;
+		if (montage)
+		{
+			CurrentMontageName = name.ToString();
+			float temp = PlayAnimMontage(montage);
+			
+			FOnMontageEnded endDelegate;
+			endDelegate.BindUObject(this, &ACSpiderManPlayer::OnStopMovementMontageEnded);
+			AnimInsRef->Montage_SetEndDelegate(endDelegate, montage);
+
+			return temp;
+
+		}
+	}
+	return 0;
+}
+
 float ACSpiderManPlayer::PlayDeathMontage(FName name)
 {
 	
@@ -2049,7 +2076,6 @@ void ACSpiderManPlayer::Dodge_SetVelocity(float value)//적 위치와 반대편�
 void ACSpiderManPlayer::SetIgnorePawn()
 {
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("DodgePawn"));
-	GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Yellow, TEXT("DodgePawn"));
 
 	/*GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel5, ECollisionResponse::ECR_Ignore);*/
@@ -2120,25 +2146,29 @@ float ACSpiderManPlayer::TakeDamage(float DamageAmount, FDamageEvent const& Dama
 		else
 		{
 			//SpiderWidget->SetHealth()
-			if (SpiderState == ESpiderState::IDLE)
+			if (SpiderState == ESpiderState::IDLE) //기본공격도 해당
 			{
 				if (DotResult > 0) //0보다 크면 같은방향을 바라보고 있는거니까
 				{
-					PlayMontageByName(SpiderMontageName::HitBack);
+
+					PlayEndedFuncMontage(SpiderMontageName::HitBack);
+
 				}
 				else
 				{
-					PlayMontageByName(SpiderMontageName::HitFront);
+					PlayEndedFuncMontage(SpiderMontageName::HitFront);
 				}
-
+				EndCombo();
+				//GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Yellow, TEXT("TurnToHit"));
 				SpiderState = ESpiderState::Hit;
 				isMovementLocked = true;
 			}
+			//GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Yellow, TEXT("NotIdle"));
 		}
 	}
 	else
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Yellow, TEXT("NotValid"));
+		
 
 	}
 
@@ -2155,8 +2185,11 @@ void ACSpiderManPlayer::EndCombo()
 	
 	isEnableNextCombo = false;
 	ComboCount = 0;
-	isMovementLocked = false;
 	SetMovementMode(EMovementMode::MOVE_Walking);
+	SpiderState = ESpiderState::IDLE;
+	isMovementLocked = false;
+	MotionWarpingComp->RemoveWarpTarget(FName(*CurrentMontageName));
+	//GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, TEXT("RemoveWarpTargetInEndCombo"));
 }
 
 
@@ -2355,28 +2388,30 @@ void ACSpiderManPlayer::DodgeInput()
 	if (SpiderState == ESpiderState::IDLE && !isMovementLocked) //idle이고, 움직일 수 있는 상태라는건 공격중이 아니라는걸로 간주, 기본공격일 때는 isMovementLocked true이므로
 	{
 		SpiderState = ESpiderState::Dodge;
-		Dodge_PlayMontage();
+		Dodge_PlayMontage();//여기서 몽타주를 플레이하면 그때 Ended가 실행이 되니까 자꾸 뒤 조건들이...
 	}
 }
 
 //고쳐야 될 것: 몽타주마다 발이 닿는 거리가 달라서... 콜라이더 자체를 좀 키우던가 애니메이션마다 사거리를 측정해서 데이터를 저장하든가 일단 지금은 1번방법
 void ACSpiderManPlayer::SetMotionWarpingLoc()
 {
+
 	FString MotionWarpingName = "Attack" + FString::FromInt(ComboCount);
 	//FString MotionWarpingName = "Attack" + FString::FromInt(4);
 
-
+	
 	if (CurrentTarget)
 	{
 		FVector DirToSelf = (GetActorLocation() - CurrentTarget->GetActorLocation()).GetSafeNormal();
 		FVector DirToTarget = CurrentTarget->GetActorLocation() - GetActorLocation();
 		//GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Flying);
 		//캐릭터 위치랑 적 위치랑 z좌표가 다를 때(지형에 따라) 바꿔줘야함
-		MotionWarpingComp->AddOrUpdateWarpTargetFromLocationAndRotation(*MotionWarpingName, CurrentTarget->GetActorLocation() + DirToSelf * 100,
+		MotionWarpingComp->AddOrUpdateWarpTargetFromLocationAndRotation(*MotionWarpingName, CurrentTarget->GetActorLocation() + FVector(DirToSelf.X, DirToSelf.Y, 0) * 100,
 			UKismetMathLibrary::MakeRotFromX(FVector(DirToTarget.X, DirToTarget.Y, 0)));
 		//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Yellow, FString::Printf(TEXT("ComboCount: %d"), ComboCount));
 
 	}
+
 
 }
 

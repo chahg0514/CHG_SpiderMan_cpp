@@ -17,6 +17,7 @@ class CPPSPIDERMAN_API UBTTask_DoPatrol_2 : public UBTTaskNode
 private:
 	float ExecuteTime = 0;
 	float BeforeLeapTime = 0;
+	
 	FVector PatrolTarget;
 public:
 	virtual EBTNodeResult::Type ExecuteTask
@@ -36,4 +37,6 @@ public:
 		FBlackboardKeySelector isCloseToLeap;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		float patrolTime = 5;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		bool IsSettingRecord = false;
 };

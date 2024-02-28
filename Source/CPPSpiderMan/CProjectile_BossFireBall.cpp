@@ -31,7 +31,7 @@ ACProjectile_BossFireBall::ACProjectile_BossFireBall()
 		Particle->SetTemplate(particle.Object);
 	}
 	//Particle->SetWorldRotation(FRotator(0, 180, 0));
-	Particle->SetRelativeScale3D(FVector(1, 3, 3));
+	Particle->SetRelativeScale3D(FVector(0.5, 3, 3));
 	ProjectileComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileComponent"));
 	ProjectileComponent->bRotationFollowsVelocity = true;
 	

@@ -37,8 +37,16 @@ void UBTTask_DoPatrol_2::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* Node
 	ACBoss_CatWoman* Boss = Cast<ACBoss_CatWoman>(EnemyAIController->GetPawn());
 	if (Boss == nullptr) FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
 
+	if (!IsSettingRecord)
+	{
+		ExecuteTime += DeltaSeconds / 3;
 
-	ExecuteTime += DeltaSeconds;
+	}
+	else
+	{
+		ExecuteTime += DeltaSeconds;
+
+	}
 	Boss->SetCirclePatrolTargetVector(PatrolTarget); //굳이 bool로 확인 안해도 새로갱신하는거 아니면 값 안바꿈
 
 	if (Boss->MoveToPatrolVector()) //도착하면 할 거 : 
@@ -65,6 +73,7 @@ void UBTTask_DoPatrol_2::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* Node
 	}
 	if (ExecuteTime > patrolTime)
 	{
+		IsSettingRecord = true;
 		if (Boss->IsCanAttack)
 		{
 			Boss->WhenEndStateCompletely(); //여기서 patrol을 제외한 것 선택

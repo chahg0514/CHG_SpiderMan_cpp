@@ -204,6 +204,11 @@ void ACSpiderManController::TestMontage()
 	MyPlayer->TestMontageInput();
 }
 
+void ACSpiderManController::SetCanZipToPoint()
+{
+	MyPlayer->SetIsCanZipPointUI();
+}
+
 FVector ACSpiderManController::FindForwardSwingForce()
 {
 	FVector Temp = FVector(GetControlRotation().Vector().X, GetControlRotation().Vector().Y, 0).GetSafeNormal();

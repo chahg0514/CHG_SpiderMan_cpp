@@ -92,6 +92,12 @@ ACBoss_CatWoman::ACBoss_CatWoman()
 	target.Name = FName("BasicAttack");
 	MotionWarpingComp->AddOrUpdateWarpTarget(target);
 	
+	UObject* BollBPActor = Cast<UObject>(StaticLoadObject(UObject::StaticClass(), NULL, TEXT("/Script/Engine.Blueprint'/Game/Blueprint/Boll.Boll'")));
+	if (BollBPActor)
+	{
+
+		BollBP = Cast<UBlueprint>(BollBPActor);
+	}
 }
 
 void ACBoss_CatWoman::BeginPlay()
@@ -126,6 +132,9 @@ void ACBoss_CatWoman::OnWarpMontageEnded(UAnimMontage* Montage, bool bInterrupte
 {
 	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("OnWarpMontageEnded"));
 	MotionWarpingComp->RemoveWarpTarget(FName(*CurrentMontageName));
+	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
+	GetCapsuleComponent()->SetCollisionProfileName(TEXT("EnemyPawn"));
+
 	SetBossState(EBossState::Patrol); 
 }
 
@@ -174,7 +183,7 @@ void ACBoss_CatWoman::PlayDeathMontage(FName name)
 			GetWorld()->GetTimerManager().SetTimer(myTimerHandle, FTimerDelegate::CreateLambda([&]()
 				{
 					// 내가 원하는 코드 구현
-					GetMesh()->SetCollisionProfileName(TEXT("Ragdoll"));
+					GetCapsuleComponent()->SetCollisionProfileName(TEXT("Ragdoll"));
 					GetMesh()->SetSimulatePhysics(true);
 
 					// 타이머 초기화
@@ -199,7 +208,8 @@ float ACBoss_CatWoman::PlayWarpMontage(FName name)
 		{
 			CurrentMontageName = name.ToString();
 			float temp = PlayAnimMontage(montage);
-
+			GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Flying);
+			GetCapsuleComponent()->SetCollisionProfileName(TEXT("EnemyPawn_MW"));
 			FOnMontageEnded endDelegate;
 			endDelegate.BindUObject(this, &ACBoss_CatWoman::OnWarpMontageEnded);
 			AnimInsRef->Montage_SetEndDelegate(endDelegate, montage);
@@ -383,7 +393,7 @@ void ACBoss_CatWoman::SetNextAttackType() //거리가 가까우면 바로 할 �
 		isSetAttackType = true;
 		break;
 	case 1:
-		BossState = EBossState::BasicAttack;
+		BossState = EBossState::FireShot;
 		AttackDistance = 150;
 		GetCharacterMovement()->MaxWalkSpeed = 350;
 		isSetAttackType = true;
@@ -557,19 +567,14 @@ void ACBoss_CatWoman::LeapToLocation(FVector loc)
 
 void ACBoss_CatWoman::SetBasicAttackMotionWarp()
 {
-	if (GetDisBetweenPlayer() > 200)
-	{
-		FVector DirToTarget = (TargetSpider->GetActorLocation() - GetActorLocation()).GetSafeNormal();
-		FVector DirToSelf = (GetActorLocation() - TargetSpider->GetActorLocation()).GetSafeNormal();
-		MotionWarpingComp->AddOrUpdateWarpTargetFromLocationAndRotation(*CurrentMontageName, TargetSpider->GetActorLocation() + DirToSelf * 120,
-			UKismetMathLibrary::MakeRotFromX(FVector(DirToTarget.X, DirToTarget.Y, 0)));
-		//LaunchCharacter(DirToTarget * 3000, true, true);
+	FVector DirToSelf = (GetActorLocation() - TargetSpider->GetActorLocation()).GetSafeNormal();
+	FVector TargetLoc = TargetSpider->GetActorLocation() - FVector(0, 0, TargetSpider->GetCapsuleComponent()->GetScaledCapsuleHalfHeight()) + FVector(DirToSelf.X, DirToSelf.Y, 0) * 30;
+	FVector DirToTarget = TargetSpider->GetActorLocation() - GetActorLocation();
+	MotionWarpingComp->AddOrUpdateWarpTargetFromLocationAndRotation(*CurrentMontageName, TargetLoc, UKismetMathLibrary::MakeRotFromX(FVector(DirToTarget.X, DirToTarget.Y, 0)));
 
-	}
-	else
-	{
-		MotionWarpingComp->AddOrUpdateWarpTargetFromLocationAndRotation(*CurrentMontageName, GetActorLocation(), GetActorRotation());
-	}
+	GetWorld()->SpawnActor<AActor>(BollBP->GeneratedClass, 
+		TargetSpider->GetActorLocation() - FVector(0, 0, TargetSpider->GetCapsuleComponent()->GetScaledCapsuleHalfHeight()) + FVector(DirToSelf.X, DirToSelf.Y, 0) * 30, GetActorRotation());
+
 	
 }
 
@@ -612,7 +617,7 @@ float ACBoss_CatWoman::TakeDamage(float DamageAmount, FDamageEvent const& Damage
 	//PointDamage 받기
 	if (DamageEvent.IsOfType(FPointDamageEvent::ClassID))
 	{
-		if (BossState == EBossState::Patrol)
+		if (BossState == EBossState::Patrol || BossState == EBossState::Stunned)
 		{
 			//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Yellow, TEXT("TakeDamage"));
 

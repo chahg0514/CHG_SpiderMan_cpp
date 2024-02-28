@@ -68,7 +68,8 @@ protected:
 	virtual void BeginPlay() override;
 public:
 	virtual void Tick(float DeltaTime) override;
-	
+
+	UBlueprint* BollBP;
 private:
 	UPROPERTY(EditAnywhere, Category = "MontageData")
 		class UDataTable* BossMontageDT;
@@ -148,6 +149,7 @@ public:
 	//MotionWarping
 	UPROPERTY(BlueprintReadWrite, Category = "MotionWarping")
 		TObjectPtr<class UMotionWarpingComponent> MotionWarpingComp;
+	UFUNCTION(BlueprintCallable)
 	void SetBasicAttackMotionWarp();
 
 	

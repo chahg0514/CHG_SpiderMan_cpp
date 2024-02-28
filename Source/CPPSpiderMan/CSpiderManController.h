@@ -56,6 +56,8 @@ private:
 		void FlyingPunch();
 	UFUNCTION()
 		void TestMontage();
+	UFUNCTION()
+		void SetCanZipToPoint();
 	FVector FindForwardSwingForce();
 	FVector FindRightSwingForce();
 

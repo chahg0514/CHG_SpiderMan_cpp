@@ -104,11 +104,10 @@ public:
 
 
 private:
-	void SetMontageEnded(FString string);
 	UFUNCTION()
 		void OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 	UFUNCTION()
-		void OnAttackMontageEndedSetIdle(UAnimMontage* Montage, bool bInterrupted);
+		void OnStopMovementMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 	UFUNCTION()
 		void OnDeathMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 	UFUNCTION()
@@ -355,12 +354,13 @@ private:
 	
 	class ACBoss_CatWoman* CurrentTarget;
 	ACharacter* CharTarget;
-	float TargetRange = 1000;
+	float TargetRange = 2500;
 	
 
 //SkillAttack
 private:
 	float PlayWarpSkillMontage(FName name); //이름으로 모션워핑 사용하는 몽타주 실행,  AttackMontageEnd 함수 연결, 현재 재생되는 몽타주 이름 저장했다가 끝날 때 WarpTarget 초기화, 재생시간 반환
+	float PlayEndedFuncMontage(FName name); //Ended 함수 연결된 몽타주 실행
 	float PlayDeathMontage(FName name);
 	bool PlayMontageByName(FName name);
 
@@ -552,6 +552,7 @@ private:
 	bool isRotationLocked = false;
 	bool isMovementLocked = false;
 	bool isCanZip = false;
+	bool isCanZipPointUI = false;
 	bool isZipJumpWindow = false;
 	bool isCanZipJump = false;
 	bool isAttaking = false;
@@ -603,5 +604,9 @@ public:
 	FORCEINLINE void SetIsMovementLocked(bool InIsMovement)
 	{
 		isMovementLocked = InIsMovement;
+	}
+	FORCEINLINE void SetIsCanZipPointUI()
+	{
+		isCanZipPointUI = !isCanZipPointUI;
 	}
 };
