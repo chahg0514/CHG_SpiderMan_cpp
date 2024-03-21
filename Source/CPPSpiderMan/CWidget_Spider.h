@@ -14,7 +14,8 @@ class CPPSPIDERMAN_API UCWidget_Spider : public UUserWidget
 {
 	GENERATED_BODY()
 private:
-	UPROPERTY(VisibleAnywhere, meta = (BindWidget))
+	//MSB3073
+	//UPROPERTY(VisibleAnywhere, meta = (BindWidget))
 		class UProgressBar* HealthBar;
 
 public:

@@ -112,9 +112,10 @@ private:
 		void OnDeathMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 	UFUNCTION()
 		void OnDodgeMontageEnded(UAnimMontage* Montage, bool bInterrupted);
-	UPROPERTY(VisibleAnywhere, Category = "Camera")
+		//MSB3073
+	//UPROPERTY(VisibleAnywhere, Category = "Camera")
 		class USpringArmComponent* SpringArm;
-	UPROPERTY(VisibleAnywhere, Category = "Camera")
+	//UPROPERTY(VisibleAnywhere, Category = "Camera")
 		class UCameraComponent* Camera;
 
 public:
@@ -130,8 +131,8 @@ public:
 private:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
-	UPROPERTY(EditAnywhere)
+	//MSB3073
+	//UPROPERTY(EditAnywhere)
 		TSubclassOf<class AActor> AmmoBlueprint;
 
 	class UCAnimInstance_Spider* AnimInsRef;
@@ -328,14 +329,15 @@ private:
 
 private:
 
-	UPROPERTY(EditAnywhere, Category = "MontageData")
+	//MSB3073
+	//UPROPERTY(EditAnywhere, Category = "MontageData")
 		class UDataTable* ComboAttackMontageDT;
-	UPROPERTY(EditAnywhere, Category = "MontageData")
+	//UPROPERTY(EditAnywhere, Category = "MontageData")
 		class UDataTable* SoundDT;
-	UPROPERTY(EditAnywhere, Category = "MontageData")
+	//UPROPERTY(EditAnywhere, Category = "MontageData")
 		class UDataTable* SkillAttackMontageDT;
 	TArray<FName> MontageListIndex;
-	UPROPERTY(EditAnywhere, Category = "MontageData")
+	//UPROPERTY(EditAnywhere, Category = "MontageData")
 		struct FDataTableRowHandle MontageRowHandle;
 
 	
@@ -387,7 +389,8 @@ public:
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation", Meta = (AllowPrivateAccess = true))
+	//MSB3073, privateaccess 뺌
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation")
 		ESpiderState SpiderState = ESpiderState::IDLE;
 	
 	//Implement In Controller, Notify Class
@@ -509,15 +512,16 @@ public:
 		void DodgeFinished();
 
 private:
-	UPROPERTY(EditAnywhere, Category = "Widget")
+	//MSB3073
+	//UPROPERTY(EditAnywhere, Category = "Widget")
 		TSubclassOf<class UUserWidget> ZipPointWidgetClass;
-	UPROPERTY()
+	//UPROPERTY()
 		class UUserWidget* ZipPointWidget;
-	UPROPERTY(VisibleAnywhere, Category = "Zip")
+	//UPROPERTY(VisibleAnywhere, Category = "Zip")
 		class UAnimMontage* ZipStartMontage;
-	UPROPERTY(VisibleAnywhere, Category = "Zip")
+	//UPROPERTY(VisibleAnywhere, Category = "Zip")
 		class UAnimMontage* AirZipMontage;
-	UPROPERTY(VisibleAnywhere, Category = "Attack")
+	//UPROPERTY(VisibleAnywhere, Category = "Attack")
 		class UAnimMontage* BasicAttack1;
 
 	//Collision Event Delegate
@@ -532,7 +536,8 @@ protected:
 	virtual void NotifyHit(UPrimitiveComponent* MyComp, AActor* Other, UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal,
 		FVector NormalImpulse, const FHitResult& Hit) override;
 	
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "Inventory", meta = (AllowPrivateAccess = true))
+	//MSB3073
+	//UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "Inventory", meta = (AllowPrivateAccess = true))
 		TSubclassOf<class UUserWidget> WidgetClass;
 
 	class UCWidget_Spider* SpiderWidget;
@@ -556,7 +561,6 @@ private:
 	bool isZipJumpWindow = false;
 	bool isCanZipJump = false;
 	bool isAttaking = false;
-	UPROPERTY(EditAnywhere, Category = "Enemy")
 	bool isBossInRange = false;
 
 
@@ -577,13 +581,14 @@ private:
 	UBlueprint* WebZipBP;
 
 	//AttackCollision
-	UPROPERTY(EditAnywhere, Category = "Animation")
+	//MSB3073
+	//UPROPERTY(EditAnywhere, Category = "Animation")
 		UCapsuleComponent* leftFootAttackCollision;
-	UPROPERTY(EditAnywhere, Category = "Animation")
+	//UPROPERTY(EditAnywhere, Category = "Animation")
 		UCapsuleComponent* rightFootAttackCollision;
-	UPROPERTY(EditAnywhere, Category = "Animation")
+	//UPROPERTY(EditAnywhere, Category = "Animation")
 		UCapsuleComponent* leftHandAttackCollision;
-	UPROPERTY(EditAnywhere, Category = "Animation")
+	//UPROPERTY(EditAnywhere, Category = "Animation")
 		UCapsuleComponent* rightHandAttackCollision; 
 
 

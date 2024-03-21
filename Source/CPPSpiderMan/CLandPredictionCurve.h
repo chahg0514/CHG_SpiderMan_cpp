@@ -24,8 +24,8 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 protected:
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	//MSB3073
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		UTimelineComponent* ExampleTimelineComp;
 
 public:

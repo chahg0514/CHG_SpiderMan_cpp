@@ -28,11 +28,11 @@ public:
 	ACAttackMontage_Spider();
 
 
-
+	//MSB3073, EditAnywhere 빼봄
 private:
-	UPROPERTY(EditAnywhere, Category = "MontageData")
+	//UPROPERTY(Category = "MontageData")
 		class UDataTable* MontageDataTable_2;
-	UPROPERTY(EditAnywhere, Category = "MontageData")
+	//UPROPERTY(Category = "MontageData")
 		struct FDataTableRowHandle MontageRowHandle_2;
 
 };

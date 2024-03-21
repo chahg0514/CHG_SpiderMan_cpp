@@ -466,13 +466,13 @@ void ACBoss_CatWoman::ApplyDamage_BasicAttack()
 			if (i.GetActor()->ActorHasTag("Player"))
 			{
 				ACSpiderManPlayer* target = Cast<ACSpiderManPlayer>(i.GetActor());
+
 				FPointDamageEvent pointDamageEvent;
 				FHitResult pointHitResult;
 				hitResult.Location = i.Location;
 				TSubclassOf<UDamageType> tmp(UDamageType::StaticClass());
 				pointDamageEvent.DamageTypeClass = tmp;
 				pointDamageEvent.HitInfo = pointHitResult;
-				//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, TEXT("ApplyToSpider"));
 				target->TakeDamage(50, pointDamageEvent, GetController(), this);
 				return;
 

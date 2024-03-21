@@ -36,9 +36,11 @@ public:
 		class UAnimMontage* Montage;
 
 };
+
+//MSB3073, 일단 주석처리
 namespace BossMontageName
 {
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "MontageName")
+	//UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "MontageName")
 	const FName hitLeft = TEXT("HitLeft");
 	const FName hitRight = TEXT("HitRight");
 	const FName hitFront = TEXT("HitFront");
@@ -71,9 +73,10 @@ public:
 
 	UBlueprint* BollBP;
 private:
-	UPROPERTY(EditAnywhere, Category = "MontageData")
+	//MSB3073, EditAnywhere 뺌
+	//UPROPERTY(Category = "MontageData")
 		class UDataTable* BossMontageDT;
-	UPROPERTY(EditAnywhere, Category = "MontageData")
+	//UPROPERTY(Category = "MontageData")
 		struct FDataTableRowHandle MontageRowHandle;
 	
 

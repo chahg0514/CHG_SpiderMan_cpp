@@ -7,13 +7,13 @@
 #include "CSpiderManPlayer.h"
 #include "CAnimInstance_Spider.generated.h"
 
-UENUM(BlueprintType) //¿­°ÅÇüÀ» ¾ğ¸®¾ó¿¡ µî·Ï ¹× ºí·çÇÁ¸°Æ® »ç¿ë °¡´É
+UENUM(BlueprintType) //ì—´ê±°í˜•ì„ ì–¸ë¦¬ì–¼ì— ë“±ë¡ ë° ë¸”ë£¨í”„ë¦°íŠ¸ ì‚¬ìš© ê°€ëŠ¥
 enum class ESwingType : uint8
 {
-	//¿­°ÅÇüÀº Á¤ÀÇÇÒ ¶§ º¯¼ö ÀÌ¸§ ¾Õ¿¡ E¸¦ ºÙÀÎ´Ù
-	//uint8: ¾çÀÇ Á¤¼öÇü 8bit
-	//¿­°ÅÇü¿¡ uint8À» »ç¿ëÇÑ´Ù´Â ÀÇ¹Ì
-	//¿­°ÅÇüÀº uint8¸¸ Áö¿øÇÑ´Ù.
+	//ì—´ê±°í˜•ì€ ì •ì˜í•  ë•Œ ë³€ìˆ˜ ì´ë¦„ ì•ì— Eë¥¼ ë¶™ì¸ë‹¤
+	//uint8: ì–‘ì˜ ì •ìˆ˜í˜• 8bit
+	//ì—´ê±°í˜•ì— uint8ì„ ì‚¬ìš©í•œë‹¤ëŠ” ì˜ë¯¸
+	//ì—´ê±°í˜•ì€ uint8ë§Œ ì§€ì›í•œë‹¤.
 	Straight UMETA(DisplayName = "straight"),
 	LeftFoot UMETA(DisplayName = "leftFoot"),
 	RightFoot UMETA(DisplayName = "rightFoot"),
@@ -25,8 +25,8 @@ enum class ESwingType : uint8
 	RightHandPull UMETA(DisplayName = "rightHandPull"),
 
 
-	//DisplayName: ¿ÜºÎ¿¡¼­ º¸¿©Áú ÀÌ¸§
-	//c++¿¡¼± ´ë¹®ÀÚ·Î ¾²°í, ºí·çÇÁ¸°Æ®¿¡¼± ¼Ò¹®ÀÚ·Î ¾¸. Á¤´äÀº ¾Æ´Ô ±×³É ºí·çÇÁ¸°Æ®¿¡¼­µµ ´ë¹®ÀÚ·Î ÇØµµ µÇ°í c++¿¡¼­ ¼Ò¹®ÀÚ·Î ÇØµµ ¹®¹ıÀÌ»óÀº ¾Æ´Ô
+	//DisplayName: ì™¸ë¶€ì—ì„œ ë³´ì—¬ì§ˆ ì´ë¦„
+	//c++ì—ì„  ëŒ€ë¬¸ìë¡œ ì“°ê³ , ë¸”ë£¨í”„ë¦°íŠ¸ì—ì„  ì†Œë¬¸ìë¡œ ì”€. ì •ë‹µì€ ì•„ë‹˜ ê·¸ëƒ¥ ë¸”ë£¨í”„ë¦°íŠ¸ì—ì„œë„ ëŒ€ë¬¸ìë¡œ í•´ë„ ë˜ê³  c++ì—ì„œ ì†Œë¬¸ìë¡œ í•´ë„ ë¬¸ë²•ì´ìƒì€ ì•„ë‹˜
 
 };
 /**
@@ -59,22 +59,22 @@ private:
 
 	void SetAimOffsetValue();
 	
+	//MSB3073 private access êº¼ë³´ê¸°
+public: //ë‹¤ë¥¸ í´ë˜ìŠ¤ì—ì„œ ë°”ê¿”ì•¼ í•˜ëŠ” ë³€ìˆ˜
 
-public: //´Ù¸¥ Å¬·¡½º¿¡¼­ ¹Ù²ã¾ß ÇÏ´Â º¯¼ö
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation", Meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation")
 		bool isHighJumpReadyAnim = false;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation", Meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation")
 		bool isWallJump = false;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation", Meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation")
 		bool isFreezeFallSpeed = false;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation", Meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation")
 		bool isSwingToLeftAnim;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation", Meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation")
 		bool isJumpFromSwing;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation", Meta = (AllowPrivateAccess = true))
-		bool Perch = false; //³¡ºÎºĞ¿¡ ¾É¾ÆÀÖ´ÂÁö
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation", Meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation")
+		bool Perch = false; //ëë¶€ë¶„ì— ì•‰ì•„ìˆëŠ”ì§€
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation")
 		bool isAttaking = false;
 
 	
@@ -109,11 +109,11 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation")
 		class ACLandPredictionCurve* CurveFloat;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation", Meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation")
 		ESwingType SwingType = ESwingType::Straight;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation", Meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation")
 		FRotator ZipPointAO;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation", Meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Animation")
 		EZipToPointState ZipToPointAnim = EZipToPointState::IDLE;
 	void SetFallSpeed(float DeltaTime);
 	void PredictLand(float DeltaTime);

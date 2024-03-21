@@ -61,8 +61,9 @@ private:
 	FVector FindForwardSwingForce();
 	FVector FindRightSwingForce();
 
+	//MSB3073
 private:
-	UPROPERTY(VisibleAnywhere, Category = "Player")
+	//UPROPERTY(VisibleAnywhere, Category = "Player")
 		class ACSpiderManPlayer* MyPlayer;
 
 	

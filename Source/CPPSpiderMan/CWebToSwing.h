@@ -23,9 +23,10 @@ private:
 
 public:
 	//, OverrideNativeName = "kkkkkkk"
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WebToSwing", meta = (ExposeOnSpawn = "true"))
+	//MSB3073
+	//UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WebToSwing", meta = (ExposeOnSpawn = "true"))
 		FVector Target = FVector(0, 0, 200);
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WebToSwing", meta = (ExposeOnSpawn = "true"))
+	//UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WebToSwing", meta = (ExposeOnSpawn = "true"))
 		FVector Source = FVector(0, 0, 0);
 	
 };

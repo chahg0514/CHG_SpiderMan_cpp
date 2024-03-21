@@ -17,9 +17,9 @@ class CPPSPIDERMAN_API UCHealthBar_Enemy : public UUserWidget
 protected:
 
 	virtual void NativeConstruct() override;
-	
+	//MSB3073
 private:
-	UPROPERTY(VisibleAnywhere, meta = (BindWidget))
+	//UPROPERTY(VisibleAnywhere, meta = (BindWidget))
 		class UProgressBar* HealthBar;
 
 public:
