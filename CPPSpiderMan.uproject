@@ -14,6 +14,11 @@
 				"AIModule",
 				"GameplayCameras"
 			]
+		},
+		{
+			"Name": "Input",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
 		}
 	],
 	"Plugins": [
@@ -31,6 +36,10 @@
 		},
 		{
 			"Name": "MotionWarping",
+			"Enabled": true
+		},
+		{
+			"Name": "GameplayAbilities",
 			"Enabled": true
 		}
 	]

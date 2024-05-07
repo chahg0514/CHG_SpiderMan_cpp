@@ -232,13 +232,13 @@ private:
 	bool Trace2FromAboveFirstHit(FVector PreviousHitLocation, FVector PreviousHitNormal, FVector& hitLocation2);
 	FVector HitLocation2;
 
-	bool IsHitNotInsideObject1(FVector InputPin, FVector InputPin2);
+	bool IsHitOutOfSight(FVector hitLocation1, FVector hitLocation2);
 	bool Trace3FromInFrontOfTheHit(FVector PreviousHitLocation, FVector PreviousHitNormal, FVector& hitLocation3, FVector& hitNormal3, FVector& traceDirectionVector3);
 	FVector HitLocation3;
 	FVector HitNormal3;
 	FVector TraceDirectionVector3;
 
-	bool IsHitNotInsideObject2(FVector A, FVector B);
+	bool IsHitOutOfSight2(FVector A, FVector B);
 	bool Trace4FromAboveTheThirdHit(FVector PreviousHitLocation, FVector PreviousHitNormal, FVector PreviousTraceDirectionVector, FVector& hitLocation4);
 	FVector HitLocation4;
 	bool ProjectCapsuleToZipPoint(FVector HitLocation);

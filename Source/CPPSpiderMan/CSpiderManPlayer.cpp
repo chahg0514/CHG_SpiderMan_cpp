@@ -459,8 +459,6 @@ void ACSpiderManPlayer::TimelineSetting()
 
 	WallRotTimeline.AddInterpFloat(WRTCurveFloat, ProgressUpdate);
 	WallRotTimeline.SetTimelineFinishedFunc(FinishedEvent);
-	//WallRotTimeline.SetLooping(true);
-	//WallRotTimeline.Play();
 	////////////
 	FOnTimelineFloat ProgressUpdate1;
 	ProgressUpdate1.BindUFunction(this, FName("RotToWallUpUpdate"));
@@ -929,7 +927,6 @@ void ACSpiderManPlayer::SetSwingType() //이거는 시작 각도에 따라 애�
 
 void ACSpiderManPlayer::StartShootWebs()
 {
-	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("StartShootWebs"));
 
 	if (isSwingToLeft)
 	{
@@ -1088,7 +1085,7 @@ bool ACSpiderManPlayer::TheTraces()
 		if (Trace2FromAboveFirstHit(HitLocation1, HitNormal1, HitLocation2))
 		{
 			
-			if (IsHitNotInsideObject1(HitLocation2, HitLocation1))
+			if (IsHitOutOfSight(HitLocation2, HitLocation1))
 			{
 				if (ProjectCapsuleToZipPoint(HitLocation2))
 				{
@@ -1110,7 +1107,7 @@ bool ACSpiderManPlayer::TheTraces()
 			if (Trace3FromInFrontOfTheHit(HitLocation1, HitNormal1, HitLocation3, HitNormal3, TraceDirectionVector3))
 			{
 
-				if (IsHitNotInsideObject2(HitLocation1, HitLocation3))
+				if (IsHitOutOfSight2(HitLocation1, HitLocation3))
 				{
 
 					if (Trace4FromAboveTheThirdHit(HitLocation3, HitNormal3, TraceDirectionVector3, HitLocation4))
@@ -1135,7 +1132,7 @@ bool ACSpiderManPlayer::TheTraces()
 
 }
 
-bool ACSpiderManPlayer::Trace1FromCharacter(FVector& hitLocation1, FVector& hitNormal1)
+bool ACSpiderManPlayer::Trace1FromCharacter(FVector& hitLocation1, FVector& hitNormal1) //캐릭터가 바라보는 방향으로 Trace, 감지된 위치와 노멀벡터 저장
 {
 	FHitResult HitResult;
 	TArray<AActor*> IgnoreActors;
@@ -1164,7 +1161,7 @@ bool ACSpiderManPlayer::Trace1FromCharacter(FVector& hitLocation1, FVector& hitN
 	return false;
 }
 
-bool ACSpiderManPlayer::Trace2FromAboveFirstHit(FVector PreviousHitLocation, FVector PreviousHitNormal, FVector& hitLocation2)
+bool ACSpiderManPlayer::Trace2FromAboveFirstHit(FVector PreviousHitLocation, FVector PreviousHitNormal, FVector& hitLocation2) //Trace1에서 감지된 곳 위쪽에서 아래로 Trace, 이게 false면 loc1을 바닥으로 간주
 {
 	FHitResult HitResult;
 	TArray<AActor*> IgnoreActors;
@@ -1177,7 +1174,7 @@ bool ACSpiderManPlayer::Trace2FromAboveFirstHit(FVector PreviousHitLocation, FVe
 	{
 		if (HitResult.bBlockingHit)
 		{
-			if ((HitResult.Normal - PreviousHitNormal).Size() > 1)
+			if ((HitResult.Normal - PreviousHitNormal).Size() > 1) //두 노멀벡터의 차이가 1보다 크다면, 즉 각도가 60도 이상이라면
 			{
 				hitLocation2 = HitResult.ImpactPoint;
 				return true;
@@ -1198,16 +1195,16 @@ bool ACSpiderManPlayer::Trace2FromAboveFirstHit(FVector PreviousHitLocation, FVe
 }
 
 //Trace2의 감지포인트와 Trace1의 감지 포인트의 차이가 DetectionRange보다 짧아야됨. 아니면 캐릭터의 시야를 벗어난 것으로 간주.
-bool ACSpiderManPlayer::IsHitNotInsideObject1(FVector InputPin, FVector InputPin2) 
+bool ACSpiderManPlayer::IsHitOutOfSight(FVector hitLocation1, FVector hitLocation2)
 {
-	if ((InputPin - InputPin2).Length() < DetectionRange) 
+	if ((hitLocation1 - hitLocation2).Length() < DetectionRange)
 	{
 		return true;
 	}
 	
 	return false;
 }
-
+//hitLocation1에다가 카메라 바라보는 방향에서 x,y쪽 방향으로만 증가시킨 곳이 Start, y좌표를 조금 뺀곳이 End로 설정하여 Trace. 바닥이므로 바닥 경사면
 bool ACSpiderManPlayer::Trace3FromInFrontOfTheHit(FVector PreviousHitLocation, FVector PreviousHitNormal, FVector& hitLocation3, FVector& hitNormal3, FVector& traceDirectionVector3)
 {
 	FHitResult HitResult;
@@ -1240,7 +1237,7 @@ bool ACSpiderManPlayer::Trace3FromInFrontOfTheHit(FVector PreviousHitLocation, F
 	return false;
 }
 
-bool ACSpiderManPlayer::IsHitNotInsideObject2(FVector A, FVector B)
+bool ACSpiderManPlayer::IsHitOutOfSight2(FVector A, FVector B)
 {
 	if ((A - B).Size() < (DetectionRange))
 	{
@@ -1272,7 +1269,7 @@ bool ACSpiderManPlayer::Trace4FromAboveTheThirdHit(FVector PreviousHitLocation, 
 	return false;
 }
 
-bool ACSpiderManPlayer::ProjectCapsuleToZipPoint(FVector HitLocation) //이거는 캐릭터가 서있을 수 있는 곳인지 확인하기 위해 진행
+bool ACSpiderManPlayer::ProjectCapsuleToZipPoint(FVector HitLocation) //캐릭터가 서있을 수 있는 곳인지 확인하기 위해 진행
 {
 	FHitResult HitResult;
 	TArray<AActor*> IgnoreActors;
@@ -1344,11 +1341,11 @@ void ACSpiderManPlayer::InitialRotationTowardZipPoint() //Perch면 시작과 방
 
 }
 
-float ACSpiderManPlayer::CalculateZipToTimelineSpeed()
+float ACSpiderManPlayer::CalculateZipToTimelineSpeed() //목표까지의 거리가 4000일때 1배, 2000은 1.5배, 1000은 2.5배
 {
-	float Temp = (AdjustedZipPoint - ZipStartLocation).Size();
-	float CurveFloat = ZipSpeedCurve->GetFloatValue(Temp / ZipToRange); //최소 0.5 ~ 최대 1까지의 값. 
-	float Temp2 = ZipToRange / Temp; //4000 ~ 1까지 가능
+	float DisToTarget = (AdjustedZipPoint - ZipStartLocation).Size();
+	float CurveFloat = UKismetMathLibrary::MapRangeClamped(DisToTarget, 0, 4000, 0.5, 1);
+	float Temp2 = ZipToRange / DisToTarget; //4000 ~ 1까지 가능
 
 	return CurveFloat * Temp2; //이 값은 //4000(거의 눈앞에 도착지점 있는 수준) ~ 0.5
 }

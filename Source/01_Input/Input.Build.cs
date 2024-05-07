@@ -2,9 +2,9 @@
 
 using UnrealBuildTool;
 
-public class CPPSpiderMan : ModuleRules
+public class Input : ModuleRules
 {
-	public CPPSpiderMan(ReadOnlyTargetRules Target) : base(Target)
+	public Input(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
